@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Tune } from '../types';
+import { formatMusical } from '../musicUtils';
 
 interface TuneLibraryProps {
   tunes: Tune[];
@@ -45,7 +46,6 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
         </div>
       </div>
 
-      {/* Horizontal Category Filter */}
       <div className="flex gap-3 overflow-x-auto pb-6 scrollbar-hide mb-12">
         {availableCategories.map(cat => (
           <button
@@ -62,7 +62,6 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
         ))}
       </div>
 
-      {/* Flat Results Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
         {filteredTunes.map((tune) => (
           <div 
@@ -76,13 +75,12 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
             <div className="p-10 flex-1 relative z-10">
               <div className="flex justify-between items-start mb-8">
                 <div className="max-w-[70%]">
-                  <h3 className="text-4xl font-jazz text-white group-hover:text-sky-400 transition-colors leading-none">
+                  <h3 className="text-4xl font-jazz text-white group-hover:text-sky-400 transition-colors leading-none uppercase">
                     {tune.title}
                   </h3>
                   <p className="text-sky-500/60 text-sm mt-2 font-realbook">{tune.composer || 'Standard'}</p>
                 </div>
                 
-                {/* Mastery Cycle Button */}
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -98,7 +96,7 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
 
               <div className="flex flex-wrap gap-y-4 gap-x-8 text-[11px] font-black uppercase tracking-widest text-slate-300">
                 <span className="flex items-center gap-3">
-                  <i className="fas fa-key text-sky-500 opacity-50"></i> {tune.key}
+                  <i className="fas fa-key text-sky-500 opacity-50"></i> {formatMusical(tune.key)}
                 </span>
                 <span className="flex items-center gap-3">
                   <i className="fas fa-metronome text-sky-500 opacity-50"></i> {tune.tempo} BPM

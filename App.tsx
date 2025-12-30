@@ -1,5 +1,5 @@
+
 import React, { useState } from 'react';
-import './src/input.css';
 import Layout from './components/Layout';
 import TuneLibrary from './components/TuneLibrary';
 import PracticeMode from './components/PracticeMode';

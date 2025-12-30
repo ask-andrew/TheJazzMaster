@@ -1,11 +1,15 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Tune, Vocabulary, Transposition } from "./types";
+import { Tune, Transposition } from "./types";
 
 /**
  * Gemini service powering 'The Shed Oracle'.
- * Strictly transposition-aware logic for jazz pedagogy.
+ * Using Flash models for token efficiency and high speed.
  */
+
+// We use 'gemini-3-flash-preview' for general efficiency.
+// If complex reasoning is required, 'gemini-3-pro-preview' is the alternative.
+const EFFICIENT_MODEL = "gemini-3-flash-preview";
 
 export async function getPracticeSuggestions(tune: Tune, transposition: Transposition) {
   try {
@@ -18,30 +22,26 @@ export async function getPracticeSuggestions(tune: Tune, transposition: Transpos
       : "Concert Pitch (No change)";
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
-      contents: `You are 'The Shed Oracle', a world-class jazz educator.
+      model: EFFICIENT_MODEL,
+      contents: `You are 'The Shed Oracle', a veteran jazz educator. 
       The student is practicing "${tune.title}" (Concert Key: ${tune.key}) on a ${transposition} instrument.
       
-      CRITICAL MATH INSTRUCTION: 
-      You must transpose ALL musical references. 
+      TRANSPOSITION RULES: 
+      All chord/note names MUST be transposed for the student's ${transposition} instrument.
       Logic: ${transpositionLogic}.
       
-      If you mention a chord or a specific note, it MUST be the note the student sees on their page. 
-      Example: If the tune has a Concert Cm7 and they are on Bb Tenor, you MUST call it Dm7.
-      Example: If the tune has a Concert Bbmaj7 and they are on Eb Alto, you MUST call it Gmaj7.
+      Pedagogy:
+      - Identify the 3rd or 7th of the ${transposition} chords as target tones.
+      - Provide a "Shed Idea" about how to bridge these specific changes.
+      - Keep it brief, grizzled, and encouraging.
 
-      Incorporate:
-      1. Target Tones: Identify the 3rd or 7th of the current ${transposition} chords.
-      2. The "Shed" Philosophy: Use encouraging but firm veteran language.
-      3. Linear Logic: How to connect the ${transposition} scales smoothly.
-
-      Provide exactly one focused 'Shed Idea' in JSON format.`,
+      Provide the response in JSON format.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            strategy: { type: Type.STRING, description: "Detailed strategy using transposed chord names" },
+            strategy: { type: Type.STRING, description: "Strategy using transposed chord names" },
             drill: {
               type: Type.OBJECT,
               properties: {
@@ -67,11 +67,11 @@ export async function analyzePracticeBalance(sessions: any[]) {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const sessionSummary = JSON.stringify(sessions.slice(-7));
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: EFFICIENT_MODEL,
       contents: `You are 'The Shed Oracle'. Analyze this musician's weekly practice log.
       Session Data: ${sessionSummary}.
       Identify if they are neglecting 'Deep Shedding' or 'Long Tones'.
-      Provide constructive advice.`,
+      Provide exactly 3 coaching points in JSON format.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
