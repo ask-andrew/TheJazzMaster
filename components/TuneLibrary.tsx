@@ -75,6 +75,10 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
             <div className="p-10 flex-1 relative z-10">
               <div className="flex justify-between items-start mb-8">
                 <div className="max-w-[70%]">
+                  <div className="flex items-center gap-2 mb-1">
+                     {tune.year && <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest bg-slate-800 px-2 py-0.5 rounded">Year {tune.year}</span>}
+                     {tune.style && <span className="text-[9px] font-black text-sky-500 uppercase tracking-widest bg-sky-500/10 px-2 py-0.5 rounded">{tune.style}</span>}
+                  </div>
                   <h3 className="text-4xl font-jazz text-white group-hover:text-sky-400 transition-colors leading-none uppercase">
                     {tune.title}
                   </h3>
@@ -94,7 +98,7 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-y-4 gap-x-8 text-[11px] font-black uppercase tracking-widest text-slate-300">
+              <div className="flex flex-wrap gap-y-4 gap-x-8 text-[11px] font-black uppercase tracking-widest text-slate-300 mb-6">
                 <span className="flex items-center gap-3">
                   <i className="fas fa-key text-sky-500 opacity-50"></i> {formatMusical(tune.key)}
                 </span>
@@ -102,9 +106,16 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
                   <i className="fas fa-metronome text-sky-500 opacity-50"></i> {tune.tempo} BPM
                 </span>
                 <span className="flex items-center gap-3">
-                  <i className="fas fa-shapes text-sky-500 opacity-50"></i> {tune.category}
+                  <i className="fas fa-shapes text-sky-500 opacity-50"></i> {tune.form.split(' ')[0]}
                 </span>
               </div>
+
+              {tune.realBookPage && (
+                <div className="flex items-center gap-3 text-[10px] font-black text-slate-600 uppercase tracking-widest border-t border-slate-900 pt-4">
+                  <i className="fas fa-book-open"></i>
+                  <span>Real Book: {tune.realBookPage}</span>
+                </div>
+              )}
             </div>
 
             <div className="p-6 border-t border-slate-800/50 bg-black/40 rounded-b-[3rem] grid grid-cols-2 gap-4">

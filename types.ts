@@ -5,6 +5,8 @@ export type Transposition = 'C' | 'Bb' | 'Eb';
 export interface Chord {
   symbol: string;
   duration: number; // in beats
+  roman?: string;
+  note?: string;
 }
 
 export interface Section {
@@ -24,23 +26,32 @@ export interface Pattern {
 
 export interface Variant {
   name: string;
+  description?: string;
   sections: Section[];
+}
+
+export interface PracticeTools {
+  iiVChains?: { bars: number[]; targetKey: string; quality?: string }[];
+  recommendedLoops?: { name: string; bars: number[]; focus: string }[];
+  soloingTips?: string[];
 }
 
 export interface Tune {
   id: string;
   title: string;
   composer: string;
+  year?: number;
   key: string;
   form: string;
-  tempo: number;
-  sections: Section[]; // Current active sections
-  variants: Variant[]; // Collection of available harmonic paths
-  patterns: Pattern[];
-  category: 'Medium' | 'Latin' | 'Blues' | 'Rhythm Changes' | '3/4' | 'Ballad';
+  tempo: number | string;
   style?: string;
+  realBookPage?: string;
+  sections: Section[]; 
+  variants: Variant[];
+  patterns: Pattern[];
+  practiceTools?: PracticeTools;
+  category: 'Medium' | 'Latin' | 'Blues' | 'Rhythm Changes' | '3/4' | 'Ballad' | 'Modal/Blues';
   mastery: 'Learning' | 'Familiar' | 'Solid' | 'Owned';
-  soloingTips?: string[];
 }
 
 export interface Vocabulary {
