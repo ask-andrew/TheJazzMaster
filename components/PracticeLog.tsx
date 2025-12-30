@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { PracticeSession, Pillar } from '../types';
-import { analyzePracticeBalance } from '../geminiService';
+import { PracticeSession, Pillar } from '../types.ts';
+import { analyzePracticeBalance } from '../geminiService.ts';
 
 const PracticeLog: React.FC = () => {
   const [sessions, setSessions] = useState<PracticeSession[]>([

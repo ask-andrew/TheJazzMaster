@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import Layout from './components/Layout';
-import TuneLibrary from './components/TuneLibrary';
-import PracticeMode from './components/PracticeMode';
-import StudyMode from './components/StudyMode';
-import PracticeLog from './components/PracticeLog';
-import { AppMode, Tune, Transposition } from './types';
-import { INITIAL_TUNES } from './constants';
+import Layout from './components/Layout.tsx';
+import TuneLibrary from './components/TuneLibrary.tsx';
+import PracticeMode from './components/PracticeMode.tsx';
+import StudyMode from './components/StudyMode.tsx';
+import PracticeLog from './components/PracticeLog.tsx';
+import { AppMode, Tune, Transposition } from './types.ts';
+import { INITIAL_TUNES } from './constants.ts';
 
 const App: React.FC = () => {
   const [activeMode, setActiveMode] = useState<AppMode>(AppMode.LIBRARY);

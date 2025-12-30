@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Tune, PatternType, Transposition, Pattern, Section, Chord } from '../types';
-import { getPracticeSuggestions } from '../geminiService';
-import { SCALE_DATA } from '../constants';
-import { transposeChord, analyzeHarmony, formatMusical } from '../musicUtils';
+import { Tune, PatternType, Transposition, Pattern, Section, Chord } from '../types.ts';
+import { getPracticeSuggestions } from '../geminiService.ts';
+import { SCALE_DATA } from '../constants.ts';
+import { transposeChord, analyzeHarmony, formatMusical } from '../musicUtils.ts';
 
 interface PracticeModeProps {
   tune: Tune;
@@ -123,7 +123,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
       case 'ii-V-I': return { bg: 'bg-sky-950/20', border: 'border-sky-500/20', accent: 'bg-sky-400', text: 'text-sky-300', scales: 'Dorian → Mixo → Ionian', label: 'Major ii-V-I' };
       case 'minor-ii-V-i': return { bg: 'bg-indigo-950/20', border: 'border-indigo-500/20', accent: 'bg-indigo-400', text: 'text-indigo-300', scales: 'm7b5 → Alt → Melodic m', label: 'Minor ii-V-i' };
       case 'turnaround': return { bg: 'bg-blue-950/20', border: 'border-blue-500/20', accent: 'bg-blue-400', text: 'text-blue-300', scales: 'I-VI-ii-V Cycles', label: 'Turnaround' };
-      default: return { bg: 'bg-slate-900/10', border: 'border-slate-800/30', accent: 'bg-transparent', text: 'text-slate-100', scales: '', label: '' };
+      default: return { bg: 'bg-slate-900/10', border: 'border-slate-800/30', accent: 'bg-transparent', text: 'text-white', scales: '', label: '' };
     }
   };
 

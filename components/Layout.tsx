@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { AppMode, Transposition } from '../types';
-import { formatMusical } from '../musicUtils';
+import { AppMode, Transposition } from '../types.ts';
+import { formatMusical } from '../musicUtils.ts';
 
 interface LayoutProps {
   children: React.ReactNode;

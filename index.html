@@ -11,7 +11,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #020617; /* Deep slate blue */
+            background-color: #020617;
             color: #f1f5f9;
         }
         .font-jazz {
@@ -35,7 +35,7 @@
             background: #334155;
         }
         .pattern-glow {
-            box-shadow: 0 0 25px rgba(14,165,233,0.15); /* Sky blue glow */
+            box-shadow: 0 0 25px rgba(14,165,233,0.15);
         }
         .glass {
             background: rgba(15, 23, 42, 0.8);
@@ -49,12 +49,14 @@
     "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.3/client"
   }
 }
 </script>
 </head>
 <body>
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>

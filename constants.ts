@@ -1,5 +1,21 @@
 
-import { Tune, Vocabulary, Chord, Variant, Section } from './types';
+import { Tune, Chord, Section } from './types.ts';
+
+/**
+ * Creates a section from a simplified object structure to support Roman Numerals.
+ */
+const createSectionDetailed = (id: string, name: string, data: { chord: string, roman?: string, note?: string }[]): Section => {
+  return {
+    id,
+    name,
+    chords: data.map(d => ({
+      symbol: d.chord,
+      duration: 4, // Assume standard 4 beats per bar for this detailed input
+      roman: d.roman,
+      note: d.note
+    }))
+  };
+};
 
 const parseBar = (barStr: string): Chord[] => {
   const chords = barStr.trim().split(/\s+/);
@@ -7,7 +23,7 @@ const parseBar = (barStr: string): Chord[] => {
   return chords.map(c => ({ symbol: c, duration: 4 / chords.length }));
 };
 
-const createSections = (data: Record<string, string[]>): Section[] => {
+const createSectionsSimple = (data: Record<string, string[]>): Section[] => {
   return Object.entries(data).map(([name, bars]) => ({
     id: `sec-${name}-${Math.random()}`,
     name,
@@ -35,12 +51,28 @@ export const INITIAL_TUNES: Tune[] = [
     realBookPage: 'Vol 1, p40',
     category: 'Medium',
     mastery: 'Learning',
-    sections: createSections({
-      "A1": ["Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7", "Gm6", "Gm6"],
-      "A2": ["Am7b5", "D7", "Gm6", "Gm6", "Cm7", "F7", "Bbmaj7", "Ebmaj7"],
-      "B": ["Am7b5", "D7", "Gm6", "Gm6"],
-      "C": ["Am7b5", "D7", "Gm6", "G7"]
-    }),
+    sections: [
+      createSectionDetailed("al-a1", "A1", [
+        { chord: "Cm7", roman: "iv7" }, { chord: "F7", roman: "bVII7" }, 
+        { chord: "Bbmaj7", roman: "bIIImaj7" }, { chord: "Ebmaj7", roman: "bVImaj7" },
+        { chord: "Am7b5", roman: "ii7b5" }, { chord: "D7", roman: "V7" }, 
+        { chord: "Gm6", roman: "i6" }, { chord: "Gm6", roman: "i6" }
+      ]),
+      createSectionDetailed("al-a2", "A2", [
+        { chord: "Am7b5", roman: "ii7b5" }, { chord: "D7", roman: "V7" }, 
+        { chord: "Gm6", roman: "i6" }, { chord: "Gm6", roman: "i6" },
+        { chord: "Cm7", roman: "iv7" }, { chord: "F7", roman: "bVII7" }, 
+        { chord: "Bbmaj7", roman: "bIIImaj7" }, { chord: "Ebmaj7", roman: "bVImaj7" }
+      ]),
+      createSectionDetailed("al-b", "B", [
+        { chord: "Am7b5", roman: "ii7b5" }, { chord: "D7", roman: "V7" }, 
+        { chord: "Gm6", roman: "i6" }, { chord: "Gm6", roman: "i6" }
+      ]),
+      createSectionDetailed("al-c", "C", [
+        { chord: "Am7b5", roman: "ii7b5" }, { chord: "D7", roman: "V7" }, 
+        { chord: "Gm6", roman: "i6" }, { chord: "G7", roman: "I7", note: "turnaround" }
+      ])
+    ],
     variants: [],
     patterns: [],
     practiceTools: {
@@ -74,12 +106,24 @@ export const INITIAL_TUNES: Tune[] = [
     realBookPage: 'Vol 1, p74',
     category: 'Latin',
     mastery: 'Solid',
-    sections: createSections({
-      "A1": ["Cm7", "Fm7", "Dm7b5", "G7"],
-      "A2": ["Cm7", "Fm7", "Dm7b5", "G7"],
-      "B": ["Ebm7", "Ab7", "Dbmaj7", "Dbmaj7"],
-      "C": ["Dm7b5", "G7", "Cm7", "Cm7"]
-    }),
+    sections: [
+      createSectionDetailed("bb-a1", "A1", [
+        { chord: "Cm7", roman: "i7" }, { chord: "Fm7", roman: "iv7" }, 
+        { chord: "Dm7b5", roman: "ii7b5" }, { chord: "G7", roman: "V7" }
+      ]),
+      createSectionDetailed("bb-a2", "A2", [
+        { chord: "Cm7", roman: "i7" }, { chord: "Fm7", roman: "iv7" }, 
+        { chord: "Dm7b5", roman: "ii7b5" }, { chord: "G7", roman: "V7" }
+      ]),
+      createSectionDetailed("bb-b", "B", [
+        { chord: "Ebm7", roman: "ii7 of Db" }, { chord: "Ab7", roman: "V7 of Db" }, 
+        { chord: "Dbmaj7", roman: "bIImaj7" }, { chord: "Dbmaj7", roman: "bIImaj7" }
+      ]),
+      createSectionDetailed("bb-c", "C", [
+        { chord: "Dm7b5", roman: "ii7b5" }, { chord: "G7", roman: "V7" }, 
+        { chord: "Cm7", roman: "i7" }, { chord: "Cm7", roman: "i7" }
+      ])
+    ],
     variants: [],
     patterns: [],
     practiceTools: {
@@ -113,19 +157,25 @@ export const INITIAL_TUNES: Tune[] = [
     realBookPage: 'Vol 1, p436',
     category: 'Blues',
     mastery: 'Solid',
-    sections: createSections({
+    sections: createSectionsSimple({
       "chorus": ["Bb7", "Bb7", "Bb7", "Bb7", "Eb7", "Eb7", "Bb7", "Bb7", "F7", "Eb7", "Bb7", "Bb7"]
     }),
     variants: [
       { 
         name: 'Basic', 
         description: 'Standard Bb blues changes',
-        sections: createSections({ "chorus": ["Bb7", "Bb7", "Bb7", "Bb7", "Eb7", "Eb7", "Bb7", "Bb7", "F7", "Eb7", "Bb7", "Bb7"] }) 
+        sections: [
+          createSectionDetailed("tm-b-chorus", "chorus", [
+            { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" },
+            { chord: "Eb7", roman: "IV7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" },
+            { chord: "F7", roman: "V7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" }
+          ])
+        ]
       },
       { 
         name: 'Advanced', 
         description: 'Bebop blues with ii-Vs and substitutions',
-        sections: createSections({ "chorus": ["Bb7", "Eb7", "Bb7", "Cm7 F7", "Eb7", "Edim7", "Bb7 D7", "Gm7 C7", "Cm7 F7", "Bm7 E7", "Bb7 G7", "Cm7 F7"] }) 
+        sections: createSectionsSimple({ "chorus": ["Bb7", "Eb7", "Bb7", "Cm7 F7", "Eb7", "Edim7", "Bb7 D7", "Gm7 C7", "Cm7 F7", "Bm7 E7", "Bb7 G7", "Cm7 F7"] }) 
       }
     ],
     patterns: [],
@@ -156,9 +206,13 @@ export const INITIAL_TUNES: Tune[] = [
     realBookPage: 'Vol 1, p18',
     category: 'Modal/Blues',
     mastery: 'Familiar',
-    sections: createSections({
-      "chorus": ["G7", "G7", "G7", "G7", "C7", "C7", "G7", "G7", "D7", "Eb7", "D7", "G7"]
-    }),
+    sections: [
+      createSectionDetailed("ab-chorus", "chorus", [
+        { chord: "G7", roman: "I7" }, { chord: "G7", roman: "I7" }, { chord: "G7", roman: "I7" }, { chord: "G7", roman: "I7" },
+        { chord: "C7", roman: "IV7" }, { chord: "C7", roman: "IV7" }, { chord: "G7", roman: "I7" }, { chord: "G7", roman: "I7" },
+        { chord: "D7", roman: "V7" }, { chord: "Eb7", roman: "bVI7" }, { chord: "D7", roman: "V7" }, { chord: "G7", roman: "I7" }
+      ])
+    ],
     variants: [],
     patterns: [],
     practiceTools: {
@@ -187,13 +241,19 @@ export const INITIAL_TUNES: Tune[] = [
     realBookPage: 'Vol 2, p185',
     category: 'Rhythm Changes',
     mastery: 'Learning',
-    sections: createSections({
-      "A": ["Bb6", "G7", "Cm7", "F7", "Bb6", "G7", "Cm7", "F7"],
-      "B": ["D7", "D7", "G7", "G7", "C7", "C7", "F7", "F7"]
-    }),
+    sections: [
+      createSectionDetailed("igr-a", "A", [
+        { chord: "Bb6", roman: "I6" }, { chord: "G7", roman: "VI7" }, { chord: "Cm7", roman: "ii7" }, { chord: "F7", roman: "V7" },
+        { chord: "Bb6", roman: "I6" }, { chord: "G7", roman: "VI7" }, { chord: "Cm7", roman: "ii7" }, { chord: "F7", roman: "V7" }
+      ]),
+      createSectionDetailed("igr-b", "B", [
+        { chord: "D7", roman: "III7" }, { chord: "D7", roman: "III7" }, { chord: "G7", roman: "VI7" }, { chord: "G7", roman: "VI7" },
+        { chord: "C7", roman: "II7" }, { chord: "C7", roman: "II7" }, { chord: "F7", roman: "V7" }, { chord: "F7", roman: "V7" }
+      ])
+    ],
     variants: [
-      { name: 'Basic', sections: createSections({ "A": ["Bb6", "G7", "Cm7", "F7", "Bb6", "G7", "Cm7", "F7"], "B": ["D7", "D7", "G7", "G7", "C7", "C7", "F7", "F7"] }) },
-      { name: 'Advanced', sections: createSections({ "A": ["Bb6 G7", "Cm7 F7", "Dm7 G7", "Cm7 F7", "Fm7 Bb7", "Eb6 Edim7", "Bb6 G7", "Cm7 F7"], "B": ["Am7", "D7", "Dm7", "G7", "Gm7", "C7", "Cm7", "F7"] }) }
+      { name: 'Basic', sections: createSectionsSimple({ "A": ["Bb6", "G7", "Cm7", "F7", "Bb6", "G7", "Cm7", "F7"], "B": ["D7", "D7", "G7", "G7", "C7", "C7", "F7", "F7"] }) },
+      { name: 'Advanced', sections: createSectionsSimple({ "A": ["Bb6 G7", "Cm7 F7", "Dm7 G7", "Cm7 F7", "Fm7 Bb7", "Eb6 Edim7", "Bb6 G7", "Cm7 F7"], "B": ["Am7", "D7", "Dm7", "G7", "Gm7", "C7", "Cm7", "F7"] }) }
     ],
     patterns: [],
     practiceTools: {
@@ -214,7 +274,7 @@ export const INITIAL_TUNES: Tune[] = [
     tempo: 160,
     category: 'Medium',
     mastery: 'Learning',
-    sections: createSections({
+    sections: createSectionsSimple({
       "A": ["C", "E7", "A7", "Dm7", "E7", "Am7", "D7", "Dm7 G7"],
       "B": ["E7", "E7", "A7", "A7", "D7", "D7", "G7", "G7"]
     }),
@@ -230,7 +290,7 @@ export const INITIAL_TUNES: Tune[] = [
     tempo: 170,
     category: 'Medium',
     mastery: 'Solid',
-    sections: createSections({
+    sections: createSectionsSimple({
       "A": ["C", "D7", "Dm7 G7", "C", "E7", "A7", "Dm7 G7", "C A7"],
       "B": ["D7", "D7", "G7", "G7", "C7", "C7", "D7", "G7"]
     }),
@@ -246,7 +306,7 @@ export const INITIAL_TUNES: Tune[] = [
     tempo: 130,
     category: 'Latin',
     mastery: 'Solid',
-    sections: createSections({
+    sections: createSectionsSimple({
       "A": ["Fm7", "Fm7", "Fm7", "Fm7", "Db7", "Db7", "Cm7", "C7"],
       "B": ["Fm7", "Bb7", "Eb7", "Ab7", "Db7", "Db7", "Cm7", "C7"]
     }),
@@ -262,7 +322,7 @@ export const INITIAL_TUNES: Tune[] = [
     tempo: 140,
     category: 'Blues',
     mastery: 'Familiar',
-    sections: createSections({ "chorus": ["C7", "C7", "C7", "C7", "F7", "F7", "C7", "C7", "G7", "F7", "C7", "G7"] }),
+    sections: createSectionsSimple({ "chorus": ["C7", "C7", "C7", "C7", "F7", "F7", "C7", "C7", "G7", "F7", "C7", "G7"] }),
     variants: [],
     patterns: []
   },
@@ -275,7 +335,7 @@ export const INITIAL_TUNES: Tune[] = [
     tempo: 180,
     category: 'Medium',
     mastery: 'Learning',
-    sections: createSections({
+    sections: createSectionsSimple({
       "A": ["Fm7", "Bb7", "Ebmaj7", "Abmaj7", "Dm7b5", "G7", "Cmaj7", "Cmaj7"],
       "B": ["Em7", "A7", "Dmaj7", "Dmaj7", "Gm7", "C7", "Fmaj7", "Fmaj7"]
     }),
@@ -291,10 +351,8 @@ export const INITIAL_TUNES: Tune[] = [
     tempo: 240,
     category: 'Blues',
     mastery: 'Owned',
-    sections: createSections({ "chorus": ["Cm7", "Cm7", "Cm7", "Cm7", "Fm7", "Fm7", "Cm7", "Cm7", "Ab7", "G7", "Cm7", "G7"] }),
+    sections: createSectionsSimple({ "chorus": ["Cm7", "Cm7", "Cm7", "Cm7", "Fm7", "Fm7", "Cm7", "Cm7", "Ab7", "G7", "Cm7", "G7"] }),
     variants: [],
     patterns: []
   }
 ];
-
-export const INITIAL_VOCAB: Vocabulary[] = [];

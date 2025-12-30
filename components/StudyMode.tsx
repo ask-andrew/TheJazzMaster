@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Tune, Transposition, Chord } from '../types';
-import { transposeChord, chunkArray, formatMusical } from '../musicUtils';
+import { Tune, Transposition, Chord } from '../types.ts';
+import { transposeChord, chunkArray, formatMusical } from '../musicUtils.ts';
 
 interface StudyModeProps {
   tunes: Tune[];

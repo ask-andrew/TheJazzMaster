@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Tune } from '../types';
-import { formatMusical } from '../musicUtils';
+import { Tune } from '../types.ts';
+import { formatMusical } from '../musicUtils.ts';
 
 interface TuneLibraryProps {
   tunes: Tune[];

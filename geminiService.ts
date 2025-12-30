@@ -1,14 +1,12 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Tune, Transposition } from "./types";
+import { Tune, Transposition } from "./types.ts";
 
 /**
  * Gemini service powering 'The Shed Oracle'.
  * Using Flash models for token efficiency and high speed.
  */
 
-// We use 'gemini-3-flash-preview' for general efficiency.
-// If complex reasoning is required, 'gemini-3-pro-preview' is the alternative.
 const EFFICIENT_MODEL = "gemini-3-flash-preview";
 
 export async function getPracticeSuggestions(tune: Tune, transposition: Transposition) {
