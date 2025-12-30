@@ -4,7 +4,7 @@ import { Tune, Transposition } from "./types.ts";
 
 /**
  * Gemini service powering 'The Shed Oracle'.
- * Using Flash models for token efficiency and high speed.
+ * Using the latest Gemini 3 Flash model for low-latency, pedagogical jazz insights.
  */
 
 const EFFICIENT_MODEL = "gemini-3-flash-preview";
