@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Tune, PatternType, Transposition, Pattern, Section, Chord } from '../types';
 import { getPracticeSuggestions } from '../geminiService';
-import { JAZZ_SHAPES, SCALE_DATA, SAX_LEGENDS } from '../constants';
+import { JAZZ_SHAPES, SCALE_DATA } from '../constants';
 import { transposeChord } from '../musicUtils';
 
 interface PracticeModeProps {
@@ -78,8 +78,6 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
     });
   }, [activeSections]);
 
-  const legend = useMemo(() => SAX_LEGENDS[Math.floor(Math.random() * SAX_LEGENDS.length)], []);
-
   useEffect(() => {
     let interval: any;
     if (isPlaying) {
@@ -118,7 +116,9 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
       {/* Header Bar */}
       <div className="bg-[#0f172a] border-b border-slate-800 px-10 py-5 flex flex-col sm:flex-row justify-between items-center sticky top-0 z-50 gap-6 shadow-2xl">
         <div className="flex items-center gap-6">
-           <img src={legend.url} alt={legend.name} className="w-16 h-16 rounded-full object-cover border-4 border-sky-400/30 shadow-lg" />
+           <div className="w-16 h-16 rounded-2xl bg-sky-500/10 border-2 border-sky-500/30 flex items-center justify-center text-sky-400 shadow-xl">
+             <i className="fas fa-music text-3xl"></i>
+           </div>
            <div>
             <h2 className="text-5xl font-jazz text-white leading-none tracking-tight">{tune.title}</h2>
             <div className="flex gap-5 text-slate-100 text-[12px] font-black uppercase tracking-[0.25em] mt-2">
@@ -185,6 +185,10 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                       const pattern = getPatternForBeat(measure.startBeat);
                       const theme = pattern ? getPatternTheme(pattern.type) : { bg: 'bg-slate-900/40', border: 'border-slate-800', text: 'text-white', scales: '' };
                       
+                      // Scale chord font based on count to ensure fit
+                      // For split chords on new lines, we use a slightly smaller size
+                      const chordFontSize = measure.chords.length > 1 ? 'text-3xl sm:text-4xl' : 'text-5xl sm:text-7xl';
+
                       return (
                         <div 
                           key={mIdx}
@@ -202,16 +206,14 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                             </div>
                           )}
                           
-                          <div className="flex items-baseline justify-center gap-4">
+                          <div className="flex flex-col items-center justify-center gap-1 px-4 w-full">
                             {measure.chords.map((chord, cIdx) => (
-                              <React.Fragment key={cIdx}>
-                                <span className={`text-5xl sm:text-7xl font-realbook whitespace-nowrap ${isCurrentBar ? 'text-black' : 'text-white'}`}>
-                                  {transposeChord(chord.symbol, transposition)}
-                                </span>
-                                {cIdx < measure.chords.length - 1 && (
-                                  <span className={`text-4xl font-light font-realbook opacity-50 ${isCurrentBar ? 'text-black' : 'text-sky-400'}`}>/</span>
-                                )}
-                              </React.Fragment>
+                              <span 
+                                key={cIdx} 
+                                className={`${chordFontSize} font-realbook whitespace-nowrap overflow-hidden text-ellipsis ${isCurrentBar ? 'text-black' : 'text-white'}`}
+                              >
+                                {transposeChord(chord.symbol, transposition)}
+                              </span>
                             ))}
                           </div>
 
@@ -275,7 +277,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                 </div>
                 <div>
                   <h3 className="text-6xl font-jazz text-white leading-none">The Shed Oracle</h3>
-                  <p className="text-[14px] text-slate-300 font-black uppercase tracking-[0.5em] mt-2">Charlie Parker Method AI</p>
+                  <p className="text-[14px] text-slate-300 font-black uppercase tracking-[0.5em] mt-2">AI Harmonic Wisdom Mentor</p>
                 </div>
               </div>
               
@@ -308,7 +310,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
               <div className="flex flex-col items-center justify-center py-32 text-slate-700 border-8 border-dashed border-slate-800 rounded-[4rem] bg-black/20">
                 <i className="fas fa-record-vinyl text-[120px] mb-12 opacity-10"></i>
                 <p className="text-3xl font-jazz tracking-[0.3em] opacity-40 uppercase">Awaiting Harmonic Wisdom</p>
-                <p className="text-xl font-realbook mt-5 opacity-30 italic">Target 3rds, connect the lines, owned the shed.</p>
+                <p className="text-xl font-realbook mt-5 opacity-30 italic">Target 3rds, connect the lines, own the shed.</p>
               </div>
             )}
           </div>
