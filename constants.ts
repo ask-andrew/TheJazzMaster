@@ -10,7 +10,7 @@ const createSectionDetailed = (id: string, name: string, data: { chord: string, 
     name,
     chords: data.map(d => ({
       symbol: d.chord,
-      duration: 4, // Assume standard 4 beats per bar for this detailed input
+      duration: 4, 
       roman: d.roman,
       note: d.note
     }))
@@ -158,7 +158,7 @@ export const INITIAL_TUNES: Tune[] = [
     category: 'Blues',
     mastery: 'Solid',
     sections: createSectionsSimple({
-      "chorus": ["Bb7", "Bb7", "Bb7", "Bb7", "Eb7", "Eb7", "Bb7", "Bb7", "F7", "Eb7", "Bb7", "Bb7"]
+      "chorus": ["Bb7", "Eb7", "Bb7", "Fm7 Bb7", "Eb7", "Edim7", "Bb7", "Gm7 C7", "Cm7", "F7", "Bb7 G7", "Cm7 F7"]
     }),
     variants: [
       { 
@@ -166,16 +166,18 @@ export const INITIAL_TUNES: Tune[] = [
         description: 'Standard Bb blues changes',
         sections: [
           createSectionDetailed("tm-b-chorus", "chorus", [
-            { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" },
+            { chord: "Bb7", roman: "I7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" },
             { chord: "Eb7", roman: "IV7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" },
-            { chord: "F7", roman: "V7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" }
+            { chord: "F7", roman: "V7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "F7", roman: "V7" }
           ])
         ]
       },
       { 
         name: 'Advanced', 
         description: 'Bebop blues with ii-Vs and substitutions',
-        sections: createSectionsSimple({ "chorus": ["Bb7", "Eb7", "Bb7", "Cm7 F7", "Eb7", "Edim7", "Bb7 D7", "Gm7 C7", "Cm7 F7", "Bm7 E7", "Bb7 G7", "Cm7 F7"] }) 
+        sections: createSectionsSimple({ 
+          "chorus": ["Bb7", "Eb7", "Bb7", "Fm7 Bb7", "Eb7", "Edim7", "Bb7", "Gm7 C7", "Cm7", "F7", "Bb7 G7", "Cm7 F7"] 
+        }) 
       }
     ],
     patterns: [],
@@ -189,7 +191,7 @@ export const INITIAL_TUNES: Tune[] = [
       soloingTips: [
         "Target 3rds and 7ths through ii-V chains",
         "Use Bb blues vs Bb mixolydian for contrast",
-        "Bars 9-12: continuous ii-V motion, practice guide tones",
+        "Bars 4: Fm7-Bb7 (Concert) is the ii-V to the IV chord",
         "Listen to Sonny Rollins for blues vocabulary"
       ]
     }
@@ -264,95 +266,5 @@ export const INITIAL_TUNES: Tune[] = [
         "At faster tempos, think in 2-bar phrases"
       ]
     }
-  },
-  {
-    id: 'all-of-me',
-    title: 'All of Me',
-    composer: 'Simons & Marks',
-    key: 'C Major',
-    form: 'AABA',
-    tempo: 160,
-    category: 'Medium',
-    mastery: 'Learning',
-    sections: createSectionsSimple({
-      "A": ["C", "E7", "A7", "Dm7", "E7", "Am7", "D7", "Dm7 G7"],
-      "B": ["E7", "E7", "A7", "A7", "D7", "D7", "G7", "G7"]
-    }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'take-a-train',
-    title: 'Take The A Train',
-    composer: 'Billy Strayhorn',
-    key: 'C Major',
-    form: 'AABA',
-    tempo: 170,
-    category: 'Medium',
-    mastery: 'Solid',
-    sections: createSectionsSimple({
-      "A": ["C", "D7", "Dm7 G7", "C", "E7", "A7", "Dm7 G7", "C A7"],
-      "B": ["D7", "D7", "G7", "G7", "C7", "C7", "D7", "G7"]
-    }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'song-for-my-father',
-    title: 'Song for My Father',
-    composer: 'Horace Silver',
-    key: 'F Minor',
-    form: 'AABA',
-    tempo: 130,
-    category: 'Latin',
-    mastery: 'Solid',
-    sections: createSectionsSimple({
-      "A": ["Fm7", "Fm7", "Fm7", "Fm7", "Db7", "Db7", "Cm7", "C7"],
-      "B": ["Fm7", "Bb7", "Eb7", "Ab7", "Db7", "Db7", "Cm7", "C7"]
-    }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'c-jam-blues',
-    title: 'C Jam Blues',
-    composer: 'Duke Ellington',
-    key: 'C Major',
-    form: '12-bar blues',
-    tempo: 140,
-    category: 'Blues',
-    mastery: 'Familiar',
-    sections: createSectionsSimple({ "chorus": ["C7", "C7", "C7", "C7", "F7", "F7", "C7", "C7", "G7", "F7", "C7", "G7"] }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'all-the-things',
-    title: 'All The Things You Are',
-    composer: 'Jerome Kern',
-    key: 'Ab Major',
-    form: 'AABA',
-    tempo: 180,
-    category: 'Medium',
-    mastery: 'Learning',
-    sections: createSectionsSimple({
-      "A": ["Fm7", "Bb7", "Ebmaj7", "Abmaj7", "Dm7b5", "G7", "Cmaj7", "Cmaj7"],
-      "B": ["Em7", "A7", "Dmaj7", "Dmaj7", "Gm7", "C7", "Fmaj7", "Fmaj7"]
-    }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'mr-pc',
-    title: 'Mr. P.C.',
-    composer: 'John Coltrane',
-    key: 'C Minor',
-    form: 'Minor blues',
-    tempo: 240,
-    category: 'Blues',
-    mastery: 'Owned',
-    sections: createSectionsSimple({ "chorus": ["Cm7", "Cm7", "Cm7", "Cm7", "Fm7", "Fm7", "Cm7", "Cm7", "Ab7", "G7", "Cm7", "G7"] }),
-    variants: [],
-    patterns: []
   }
 ];
