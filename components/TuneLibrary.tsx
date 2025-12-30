@@ -1,41 +1,47 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Tune } from '../types';
 
 interface TuneLibraryProps {
   tunes: Tune[];
   onSelect: (tune: Tune, mode?: 'PRACTICE' | 'STUDY') => void;
+  onUpdateMastery: (tuneId: string, mastery: Tune['mastery']) => void;
   selectedTuneId?: string;
 }
 
-const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, selectedTuneId }) => {
-  const [filterYear, setFilterYear] = useState<1 | 2>(1);
-  const [activeCategory, setActiveCategory] = useState<string>('All');
+const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMastery, selectedTuneId }) => {
+  const [activeCategory, setActiveCategory] = React.useState<string>('All');
 
   const availableCategories = ['All', ...Array.from(new Set(tunes.map(t => t.category)))];
   
   const filteredTunes = tunes.filter(t => 
-    t.year === filterYear && 
-    (activeCategory === 'All' || t.category === activeCategory)
+    activeCategory === 'All' || t.category === activeCategory
   );
+
+  const masteryLevels: Tune['mastery'][] = ['Learning', 'Familiar', 'Solid', 'Owned'];
+
+  const getMasteryStyles = (mastery: Tune['mastery']) => {
+    switch(mastery) {
+      case 'Learning': return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+      case 'Familiar': return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      case 'Solid': return 'bg-sky-500/10 text-sky-400 border-sky-500/30';
+      case 'Owned': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      default: return 'bg-slate-800 text-slate-400 border-slate-700';
+    }
+  };
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-8">
         <div>
           <h2 className="text-6xl font-jazz text-white leading-none tracking-tight">The Library</h2>
-          <p className="text-slate-300 font-realbook mt-3 text-xl">Curated standards for progressive mastery.</p>
+          <p className="text-slate-300 font-realbook mt-3 text-xl">Manage your active repertoire and mastery.</p>
         </div>
         
-        <div className="flex items-center gap-4 bg-slate-900/60 p-2 rounded-[1.5rem] border border-slate-800 shadow-xl">
-          <button 
-            onClick={() => setFilterYear(1)}
-            className={`px-10 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterYear === 1 ? 'bg-sky-500 text-black shadow-lg shadow-sky-500/30' : 'text-slate-400 hover:text-white'}`}
-          >Year 1</button>
-          <button 
-            onClick={() => setFilterYear(2)}
-            className={`px-10 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterYear === 2 ? 'bg-sky-500 text-black shadow-lg shadow-sky-500/30' : 'text-slate-400 hover:text-white'}`}
-          >Year 2</button>
+        <div className="bg-slate-900/40 px-6 py-3 rounded-2xl border border-slate-800 hidden md:block">
+          <span className="text-xs font-black uppercase tracking-widest text-slate-500">
+            Total Standards: {tunes.length}
+          </span>
         </div>
       </div>
 
@@ -69,19 +75,25 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, selectedTune
           >
             <div className="p-10 flex-1 relative z-10">
               <div className="flex justify-between items-start mb-8">
-                <div className="max-w-[75%]">
+                <div className="max-w-[70%]">
                   <h3 className="text-4xl font-jazz text-white group-hover:text-sky-400 transition-colors leading-none">
                     {tune.title}
                   </h3>
                   <p className="text-sky-500/60 text-sm mt-2 font-realbook">{tune.composer || 'Standard'}</p>
                 </div>
-                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                  tune.mastery === 'Owned' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
-                  tune.mastery === 'Solid' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' :
-                  'bg-slate-800 text-slate-400'
-                }`}>
+                
+                {/* Mastery Cycle Button */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const currentIndex = masteryLevels.indexOf(tune.mastery);
+                    const nextIndex = (currentIndex + 1) % masteryLevels.length;
+                    onUpdateMastery(tune.id, masteryLevels[nextIndex]);
+                  }}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all hover:scale-105 active:scale-95 ${getMasteryStyles(tune.mastery)}`}
+                >
                   {tune.mastery}
-                </div>
+                </button>
               </div>
 
               <div className="flex flex-wrap gap-y-4 gap-x-8 text-[11px] font-black uppercase tracking-widest text-slate-300">
@@ -100,13 +112,13 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, selectedTune
             <div className="p-6 border-t border-slate-800/50 bg-black/40 rounded-b-[3rem] grid grid-cols-2 gap-4">
               <button 
                 onClick={() => onSelect(tune, 'PRACTICE')}
-                className="flex items-center justify-center gap-3 py-4 bg-slate-900 hover:bg-sky-500 hover:text-black rounded-2xl text-[11px] font-black transition-all uppercase tracking-[0.2em] border border-slate-800/50"
+                className="flex items-center justify-center gap-3 py-4 bg-slate-900 hover:bg-sky-500 hover:text-black rounded-2xl text-[11px] font-black transition-all uppercase tracking-[0.2em] border border-slate-800/50 shadow-md"
               >
                 <i className="fas fa-play text-[9px]"></i> Practice
               </button>
               <button 
                 onClick={() => onSelect(tune, 'STUDY')}
-                className="flex items-center justify-center gap-3 py-4 bg-slate-900 hover:bg-indigo-500 hover:text-white rounded-2xl text-[11px] font-black transition-all uppercase tracking-[0.2em] border border-slate-800/50"
+                className="flex items-center justify-center gap-3 py-4 bg-slate-900 hover:bg-indigo-500 hover:text-white rounded-2xl text-[11px] font-black transition-all uppercase tracking-[0.2em] border border-slate-800/50 shadow-md"
               >
                 <i className="fas fa-brain text-[9px]"></i> Study
               </button>

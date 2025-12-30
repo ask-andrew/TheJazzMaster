@@ -37,7 +37,6 @@ export interface Tune {
   sections: Section[]; // Current active sections
   variants: Variant[]; // Collection of available harmonic paths
   patterns: Pattern[];
-  year: 1 | 2;
   category: 'Medium' | 'Latin' | 'Blues' | 'Rhythm Changes' | '3/4' | 'Ballad';
   style?: string;
   mastery: 'Learning' | 'Familiar' | 'Solid' | 'Owned';

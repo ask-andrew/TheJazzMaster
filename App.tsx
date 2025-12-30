@@ -25,6 +25,10 @@ const App: React.FC = () => {
     }
   };
 
+  const updateTuneMastery = (tuneId: string, mastery: Tune['mastery']) => {
+    setTunes(prev => prev.map(t => t.id === tuneId ? { ...t, mastery } : t));
+  };
+
   const renderContent = () => {
     switch (activeMode) {
       case AppMode.LIBRARY:
@@ -32,6 +36,7 @@ const App: React.FC = () => {
           <TuneLibrary 
             tunes={tunes} 
             onSelect={handleTuneSelect} 
+            onUpdateMastery={updateTuneMastery}
             selectedTuneId={selectedTuneId} 
           />
         );
@@ -49,7 +54,7 @@ const App: React.FC = () => {
       case AppMode.LOG:
         return <PracticeLog />;
       default:
-        return <TuneLibrary tunes={tunes} onSelect={handleTuneSelect} />;
+        return <TuneLibrary tunes={tunes} onSelect={handleTuneSelect} onUpdateMastery={updateTuneMastery} />;
     }
   };
 

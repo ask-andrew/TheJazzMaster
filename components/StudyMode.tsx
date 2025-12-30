@@ -35,15 +35,15 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
   const handleNext = () => {
     setShowAnswer(false);
     setFlashcardStep(0);
-    if (chunkIndex < chunks.length - 1) {
+    if (chunks.length > 0 && chunkIndex < chunks.length - 1) {
       setChunkIndex(prev => prev + 1);
     } else {
       setChunkIndex(0);
-      // Optional: cycle through tunes or just stay on one
     }
   };
 
   const getGuideTones = (chordSymbol: string) => {
+    if (!chordSymbol) return '?';
     const match = chordSymbol.match(/^([A-G][b#]?)/);
     if (!match) return '?';
     return `3rd & 7th of ${transposeChord(chordSymbol, transposition)}`;
@@ -127,7 +127,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
         ))}
       </div>
 
-      {activeQuiz === 'CHUNKS' && currentTune ? (
+      {activeQuiz === 'CHUNKS' && currentTune && chunks.length > 0 ? (
         <div className="bg-zinc-900 rounded-3xl p-10 border border-zinc-800 relative overflow-hidden animate-in fade-in zoom-in duration-300">
           <div className="absolute top-0 left-0 w-full h-1 bg-amber-500/10">
             <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${((chunkIndex + 1) / chunks.length) * 100}%` }}></div>
@@ -180,7 +180,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
             </div>
           </div>
         </div>
-      ) : activeQuiz === 'VISUALIZATION' && currentTune ? (
+      ) : activeQuiz === 'VISUALIZATION' && currentTune && chunks.length > 0 ? (
         <div className="bg-zinc-900 rounded-3xl p-10 border border-zinc-800 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="text-center">
             <div className="flex justify-center items-center gap-3 mb-8">

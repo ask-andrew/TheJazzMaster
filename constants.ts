@@ -5,7 +5,7 @@ import { Tune, Vocabulary, Chord, Variant } from './types';
 const parseBar = (barStr: string): Chord[] => {
   const chords = barStr.trim().split(/\s+/);
   if (chords.length === 1) return [{ symbol: chords[0], duration: 4 }];
-  return chords.map(c => ({ symbol: c, duration: 2 }));
+  return chords.map(c => ({ symbol: c, duration: 4 / chords.length }));
 };
 
 const createSections = (data: Record<string, string[]>): any[] => {
@@ -15,13 +15,6 @@ const createSections = (data: Record<string, string[]>): any[] => {
     chords: bars.flatMap(parseBar)
   }));
 };
-
-export const SAX_LEGENDS = [
-  { name: 'John Coltrane', url: 'https://upload.wikimedia.org/wikipedia/commons/9/9a/John_Coltrane_1963.jpg' },
-  { name: 'Charlie Parker', url: 'https://upload.wikimedia.org/wikipedia/commons/0/00/Charlie_Parker%2C_William_P._Gottlieb_Studio%2C_N.Y.%2C_ca._Aug._1947_%28Gottlieb_06821%29.jpg' },
-  { name: 'Cannonball Adderley', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Julian_Cannonball_Adderley_1961.jpg' },
-  { name: 'Dexter Gordon', url: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Dexter_Gordon%2C_1948_%28William_P._Gottlieb_03131%29.jpg' }
-];
 
 export const JAZZ_SHAPES = [
   { name: '1 2 3 5', description: 'The fundamental melodic building block. High rhythmic flexibility.' },
@@ -36,20 +29,6 @@ export const SCALE_DATA = [
   { name: 'Melodic Minor', intervals: '1 2 b3 4 5 6 7', description: 'The "Jazz Minor". Used for altered dominants.' }
 ];
 
-const autumnBasic = createSections({
-  "A": ["Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7alt", "Gm7", "Gm7"],
-  "A2": ["Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7alt", "Gm7", "Gm7"],
-  "B": ["Am7b5", "D7alt", "Gm7", "Gm7", "Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7alt", "Gm7", "Gm7"]
-});
-
-const tenorBasic = createSections({
-  "chorus": ["Bb7", "Eb7", "Bb7", "Bb7", "Eb7", "Eb7", "Bb7", "Bb7", "F7", "Eb7", "Bb7", "F7"]
-});
-
-const tenorAdvanced = createSections({
-  "chorus": ["Bb7", "Bb7", "Bb7", "Cm7 F7", "Eb7", "Edim", "Bb7 D7", "Gm7 C7", "Cm7 F7", "Bm7 E7", "Bb7 G7", "Cm7 F7"]
-});
-
 export const INITIAL_TUNES: Tune[] = [
   {
     id: 'autumn-leaves',
@@ -58,39 +37,14 @@ export const INITIAL_TUNES: Tune[] = [
     key: 'G Minor',
     form: 'AAB',
     tempo: 140,
-    year: 1,
     category: 'Medium',
     mastery: 'Learning',
-    sections: autumnBasic,
-    variants: [{ name: 'Basic', sections: autumnBasic }],
-    patterns: [
-      { id: 'p1', type: 'ii-V-I', key: 'Bb', startBeat: 0, endBeat: 12, chords: ['Cm7', 'F7', 'Bbmaj7'] },
-      { id: 'p2', type: 'minor-ii-V-i', key: 'Gm', startBeat: 16, endBeat: 28, chords: ['Am7b5', 'D7alt', 'Gm7'] }
-    ]
-  },
-  {
-    id: 'tenor-madness',
-    title: 'Tenor Madness',
-    composer: 'Sonny Rollins',
-    key: 'Bb Major',
-    form: '12-bar blues',
-    tempo: 180,
-    year: 1,
-    category: 'Blues',
-    style: 'Straight-ahead swing',
-    mastery: 'Owned',
-    sections: tenorBasic,
-    variants: [
-      { name: 'Basic', sections: tenorBasic },
-      { name: 'Advanced', sections: tenorAdvanced }
-    ],
-    patterns: [{ id: 'p1', type: 'ii-V-I', key: 'Bb', startBeat: 32, endBeat: 40, chords: ['Cm7', 'F7', 'Bb7'] }],
-    soloingTips: [
-      "Outline dominant 7ths clearly in basic mode",
-      "Target 3rds and 7ths through ii–V chains",
-      "Use Bb mixolydian vs Bb blues to hear contrast",
-      "Practice guide-tone lines through bars 9–12"
-    ]
+    sections: createSections({
+      "A": ["Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7alt", "Gm7", "Gm7"],
+      "B": ["Am7b5", "D7alt", "Gm7", "Gm7", "Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7alt", "Gm7", "Gm7"]
+    }),
+    variants: [],
+    patterns: [{ id: 'p1', type: 'ii-V-I', key: 'Bb', startBeat: 0, endBeat: 12, chords: ['Cm7', 'F7', 'Bbmaj7'] }]
   },
   {
     id: 'blue-bossa',
@@ -99,31 +53,246 @@ export const INITIAL_TUNES: Tune[] = [
     key: 'C Minor',
     form: '16 Bar',
     tempo: 160,
-    year: 1,
     category: 'Latin',
     mastery: 'Solid',
     sections: createSections({
-      "A": ["Cm7", "Fm7", "Dm7b5 G7", "Cm7", "Eb7", "Ab7", "Dm7b5 G7", "Cm7"],
-      "B": ["Fm7", "Bb7", "Ebmaj7", "Ab7", "Dm7b5 G7", "Cm7", "Dm7b5 G7", "Cm7"]
+      "main": ["Cm7", "Fm7", "Dm7b5 G7", "Cm7", "Ebm7", "Ab7", "Dbmaj7", "Dbmaj7", "Dm7b5", "G7", "Cm7", "Cm7"]
     }),
-    variants: [{ name: 'Basic', sections: createSections({ "main": ["Cm7", "Fm7", "Dm7b5 G7", "Cm7", "Eb7", "Ab7", "Dm7b5 G7", "Cm7"] }) }],
+    variants: [],
     patterns: []
   },
   {
-    id: 'all-of-me',
-    title: 'All of Me',
-    composer: 'Marks/Simons',
-    key: 'C Major',
-    form: 'ABAC',
-    tempo: 160,
-    year: 1,
-    category: 'Medium',
+    id: 'summertime',
+    title: 'Summertime',
+    composer: 'George Gershwin',
+    key: 'A Minor',
+    form: 'AB',
+    tempo: 110,
+    category: 'Latin',
     mastery: 'Familiar',
-    sections: createSections({
-      "A": ["C6", "E7", "A7", "Dm7", "E7", "Am7", "D7", "Dm7 G7"],
-      "B": ["C6", "E7", "A7", "Dm7", "F6", "Fm6", "C6 A7", "Dm7 G7"]
-    }),
-    variants: [{ name: 'Basic', sections: createSections({ "A": ["C6", "E7", "A7", "Dm7"], "B": ["E7", "Am7", "D7", "Dm7 G7"] }) }],
+    sections: createSections({ "A": ["Am7", "Bm7b5 E7alt", "Am7", "Am7", "Dm7", "Dm7", "Bb9", "E7alt"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'tenor-madness',
+    title: 'Tenor Madness',
+    composer: 'Sonny Rollins',
+    key: 'Bb Major',
+    form: '12-bar blues',
+    tempo: 190,
+    category: 'Blues',
+    mastery: 'Owned',
+    sections: createSections({ "blues": ["Bb7", "Eb7", "Bb7", "Bb7", "Eb7", "Eb7", "Bb7", "Bb7", "F7", "Eb7", "Bb7", "F7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'satin-doll',
+    title: 'Satin Doll',
+    composer: 'Duke Ellington',
+    key: 'C Major',
+    form: 'AABA',
+    tempo: 125,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSections({ "A": ["Dm7 G7", "Dm7 G7", "Em7 A7", "Em7 A7", "Am7 D7", "Abm7 Db7", "Cmaj7", "Cmaj7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'take-the-a-train',
+    title: "Take The 'A' Train",
+    composer: 'Billy Strayhorn',
+    key: 'C Major',
+    form: 'AABA',
+    tempo: 165,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSections({ "A": ["C6", "C6", "D7b5", "D7b5", "Dm7", "G7", "C6", "Dm7 G7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'black-orpheus',
+    title: 'Black Orpheus',
+    composer: 'Luiz Bonfá',
+    key: 'A Minor',
+    form: 'AABC',
+    tempo: 140,
+    category: 'Latin',
+    mastery: 'Familiar',
+    sections: createSections({ "A": ["Am7", "Bm7b5 E7", "Am7", "Bm7b5 E7", "Am7", "Dm7 G7", "Cmaj7", "Bm7b5 E7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'fly-me-to-the-moon',
+    title: 'Fly Me To The Moon',
+    composer: 'Bart Howard',
+    key: 'C Major',
+    form: 'AB',
+    tempo: 130,
+    category: 'Medium',
+    mastery: 'Solid',
+    sections: createSections({ "A": ["Am7", "Dm7", "G7", "Cmaj7", "Fmaj7", "Bm7b5", "E7", "Am7 A7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'solar',
+    title: 'Solar',
+    composer: 'Miles Davis',
+    key: 'C Minor',
+    form: '12 Bar',
+    tempo: 175,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSections({ "chorus": ["Cm6", "Cm6", "Gm7", "C7", "Fmaj7", "Fmaj7", "Fm7", "Bb7", "Ebmaj7", "Dm7b5", "G7", "Cm6"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'song-for-my-father',
+    title: 'Song For My Father',
+    composer: 'Horace Silver',
+    key: 'F Minor',
+    form: 'AAB',
+    tempo: 130,
+    category: 'Latin',
+    mastery: 'Solid',
+    sections: createSections({ "A": ["Fm7", "Fm7", "Eb7", "Eb7", "Db7", "C7alt", "Fm7", "Fm7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'straight-no-chaser',
+    title: 'Straight, No Chaser',
+    composer: 'Thelonious Monk',
+    key: 'F Major',
+    form: '12-bar blues',
+    tempo: 160,
+    category: 'Blues',
+    mastery: 'Familiar',
+    sections: createSections({ "blues": ["F7", "Bb7", "F7", "F7", "Bb7", "Bb7", "F7", "D7alt", "Gm7", "C7", "F7", "C7alt"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'oleo',
+    title: 'Oleo',
+    composer: 'Sonny Rollins',
+    key: 'Bb Major',
+    form: 'AABA',
+    tempo: 240,
+    category: 'Rhythm Changes',
+    mastery: 'Learning',
+    sections: createSections({ "A": ["Bb G7", "Cm7 F7", "Bb G7", "Cm7 F7", "Fm7 Bb7", "Eb7 Edim", "Bb F7", "Bb"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'giant-steps',
+    title: 'Giant Steps',
+    composer: 'John Coltrane',
+    key: 'B Major',
+    form: '16 Bar',
+    tempo: 280,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSections({ "main": ["Bmaj7 D7", "Gmaj7 Bb7", "Ebmaj7", "Am7 D7", "Gmaj7 Bb7", "Ebmaj7 F#7", "Bmaj7", "Fm7 Bb7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'lady-bird',
+    title: 'Lady Bird',
+    composer: 'Tadd Dameron',
+    key: 'C Major',
+    form: '16 Bar',
+    tempo: 180,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSections({ "main": ["Cmaj7", "Cmaj7", "Fm7", "Bb7", "Cmaj7", "Cmaj7", "Bbm7", "Eb7", "Am7", "D7", "Dm7", "G7", "Cmaj7 Eb7", "Abmaj7 Db7", "Cmaj7", "G7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'st-thomas',
+    title: 'St. Thomas',
+    composer: 'Sonny Rollins',
+    key: 'C Major',
+    form: '16 Bar',
+    tempo: 170,
+    category: 'Latin',
+    mastery: 'Familiar',
+    sections: createSections({ "main": ["C6", "C6", "G7", "C6", "C6", "Fmaj7", "Em7 A7", "Dm7 G7", "C6", "C6", "G7", "C6", "C6", "Fmaj7", "Em7 A7", "Dm7 G7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'recorda-me',
+    title: 'Recorda Me',
+    composer: 'Joe Henderson',
+    key: 'A Minor',
+    form: '16 Bar',
+    tempo: 160,
+    category: 'Latin',
+    mastery: 'Learning',
+    sections: createSections({ "main": ["Am7", "Am7", "Am7", "Am7", "Cm7", "Cm7", "F7", "F7", "Bbmaj7", "Bbmaj7", "Ebm7", "Ab7", "Dbmaj7", "Gm7b5", "C7alt", "Fm7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'blue-train',
+    title: 'Blue Train',
+    composer: 'John Coltrane',
+    key: 'Eb Major',
+    form: '12-bar blues',
+    tempo: 140,
+    category: 'Blues',
+    mastery: 'Solid',
+    sections: createSections({ "blues": ["Eb7", "Ab7", "Eb7", "Eb7", "Ab7", "Ab7", "Eb7", "Eb7", "Bbm7", "Eb7", "Ab7", "Eb7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'all-the-things',
+    title: 'All The Things You Are',
+    composer: 'Jerome Kern',
+    key: 'Ab Major',
+    form: 'AABA',
+    tempo: 150,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSections({ "A": ["Fm7", "Bbm7", "Eb7", "Abmaj7", "Dbmaj7", "Dm7", "G7", "Cmaj7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'well-you-neednt',
+    title: "Well You Needn't",
+    composer: 'Thelonious Monk',
+    key: 'F Major',
+    form: 'AABA',
+    tempo: 180,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSections({ "A": ["F7", "Gb7", "F7", "Gb7", "F7", "Gb7", "F7", "Gb7"] }),
+    variants: [],
+    patterns: []
+  },
+  {
+    id: 'cantaloupe-island',
+    title: 'Cantaloupe Island',
+    composer: 'Herbie Hancock',
+    key: 'F Minor',
+    form: '16 Bar',
+    tempo: 120,
+    category: 'Medium',
+    mastery: 'Solid',
+    sections: createSections({ "main": ["Fm7", "Fm7", "Fm7", "Fm7", "Db7", "Db7", "Db7", "Db7", "Dm7", "Dm7", "Dm7", "Dm7", "Fm7", "Fm7", "Fm7", "Fm7"] }),
+    variants: [],
     patterns: []
   }
 ];

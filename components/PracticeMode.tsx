@@ -45,7 +45,11 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
   const activeSections = useMemo(() => {
-    return tune.variants[selectedVariantIndex]?.sections || tune.sections;
+    // Defensively check for variants existence
+    if (tune.variants && tune.variants.length > 0 && tune.variants[selectedVariantIndex]) {
+      return tune.variants[selectedVariantIndex].sections;
+    }
+    return tune.sections;
   }, [tune, selectedVariantIndex]);
 
   const groupedSections = useMemo(() => {
@@ -98,7 +102,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   };
 
   const getPatternForBeat = (beat: number): Pattern | undefined => {
-    return tune.patterns.find(p => beat >= p.startBeat && beat < p.endBeat);
+    return tune.patterns?.find(p => beat >= p.startBeat && beat < p.endBeat);
   };
 
   const getPatternTheme = (type: PatternType) => {
@@ -132,7 +136,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
         </div>
 
         <div className="flex items-center gap-8">
-          {tune.variants.length > 1 && (
+          {tune.variants && tune.variants.length > 1 && (
             <div className="flex bg-black/60 rounded-2xl p-2 border border-slate-700">
               {tune.variants.map((v, i) => (
                 <button
@@ -185,8 +189,6 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                       const pattern = getPatternForBeat(measure.startBeat);
                       const theme = pattern ? getPatternTheme(pattern.type) : { bg: 'bg-slate-900/40', border: 'border-slate-800', text: 'text-white', scales: '' };
                       
-                      // Scale chord font based on count to ensure fit
-                      // For split chords on new lines, we use a slightly smaller size
                       const chordFontSize = measure.chords.length > 1 ? 'text-3xl sm:text-4xl' : 'text-5xl sm:text-7xl';
 
                       return (
