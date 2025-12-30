@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Tune, PatternType, Transposition, Pattern, Section, Chord } from '../types.ts';
 import { getPracticeSuggestions } from '../geminiService.ts';
 import { SCALE_DATA } from '../constants.ts';
@@ -48,6 +48,31 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [activeTab, setActiveTab] = useState<'chords' | 'tech'>('chords');
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [metronomeEnabled, setMetronomeEnabled] = useState(true);
+
+  const audioCtx = useRef<AudioContext | null>(null);
+
+  const playClick = (beat: number) => {
+    if (!metronomeEnabled) return;
+    if (!audioCtx.current) {
+      audioCtx.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    const ctx = audioCtx.current;
+    const osc = ctx.createOscillator();
+    const envelope = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.value = beat === 0 ? 1000 : 800;
+
+    envelope.gain.value = 0.15;
+    envelope.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+
+    osc.connect(envelope);
+    envelope.connect(ctx.destination);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.1);
+  };
 
   const activeSections = useMemo(() => {
     if (tune.variants && tune.variants.length > 0 && tune.variants[selectedVariantIndex]) {
@@ -97,11 +122,15 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
     if (isPlaying) {
       interval = setInterval(() => {
         const totalBeats = activeSections.reduce((acc, s) => acc + s.chords.reduce((bc, c) => bc + c.duration, 0), 0);
-        setCurrentBeat((prev) => (prev + 1) % totalBeats);
+        setCurrentBeat((prev) => {
+          const next = (prev + 1) % totalBeats;
+          playClick(next % 4);
+          return next;
+        });
       }, (60 / tempoVal) * 1000);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, tune.tempo, activeSections]);
+  }, [isPlaying, tune.tempo, activeSections, metronomeEnabled]);
 
   const loadAiSuggestions = async () => {
     setIsLoadingAi(true);
@@ -131,8 +160,8 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
     <div className="flex flex-col h-full bg-[#020617] font-sans relative overflow-hidden">
       <div className="bg-[#0f172a] border-b border-slate-800 px-6 py-4 flex flex-row justify-between items-center sticky top-0 z-50 gap-4 shadow-xl">
         <div className="flex items-center gap-4">
-           <div className="w-12 h-12 rounded-xl bg-sky-500/10 border-2 border-sky-500/30 flex items-center justify-center text-sky-400 shadow-lg shadow-sky-500/5">
-             <i className="fas fa-music text-xl"></i>
+           <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-sky-400 transition-all ${isPlaying ? 'bg-sky-500/20 border-sky-400 animate-[pulse_1s_infinite]' : 'bg-sky-500/10 border-sky-500/30'}`}>
+             <i className="fas fa-drum text-xl"></i>
            </div>
            <div>
             <h2 className="text-3xl font-jazz text-white leading-none truncate md:max-w-none uppercase">{tune.title}</h2>
@@ -145,8 +174,16 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
         </div>
 
         <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setMetronomeEnabled(!metronomeEnabled)}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm transition-all border ${metronomeEnabled ? 'bg-sky-500/20 border-sky-500/40 text-sky-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}
+            title="Metronome Audio"
+          >
+            <i className={`fas ${metronomeEnabled ? 'fa-volume-high' : 'fa-volume-mute'}`}></i>
+          </button>
+
           {tune.variants && tune.variants.length > 0 && (
-            <div className="flex bg-black/40 rounded-xl p-1 border border-slate-700 h-10">
+            <div className="flex bg-black/40 rounded-xl p-1 border border-slate-700 h-10 hidden md:flex">
               <button
                 onClick={() => setSelectedVariantIndex(-1)}
                 className={`px-4 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${
@@ -178,7 +215,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
           <button 
             onClick={() => setIsPlaying(!isPlaying)}
             className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all shadow-xl ${
-              isPlaying ? 'bg-slate-800 border-2 border-red-500 text-red-500 animate-pulse' : 'bg-sky-500 text-black'
+              isPlaying ? 'bg-slate-800 border-2 border-red-500 text-red-500' : 'bg-sky-500 text-black'
             }`}
           >
             <i className={`fas ${isPlaying ? 'fa-stop' : 'fa-play'}`}></i>
@@ -300,29 +337,6 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                     </div>
                   </div>
                 )}
-
-                <div className="bg-[#0f172a] border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl">
-                   <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-800">
-                      <i className="fas fa-layer-group text-sky-400 text-xs"></i>
-                      <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Harmonic Legend</h5>
-                   </div>
-                   <div className="space-y-4">
-                      <div className="flex items-center gap-4 group">
-                         <div className="w-4 h-6 rounded-sm bg-sky-400"></div>
-                         <div>
-                            <p className="text-[10px] font-black text-white uppercase tracking-wide leading-none">Major ii-V-I</p>
-                            <p className="text-[8px] text-slate-500 font-realbook mt-1">Dorian → Mixo → Ionian</p>
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-4 group">
-                         <div className="w-4 h-6 rounded-sm bg-indigo-400"></div>
-                         <div>
-                            <p className="text-[10px] font-black text-white uppercase tracking-wide leading-none">Minor ii-V-i</p>
-                            <p className="text-[8px] text-slate-500 font-realbook mt-1">Harmonic Minor / Alt</p>
-                         </div>
-                      </div>
-                   </div>
-                </div>
               </div>
             </div>
           ) : (
