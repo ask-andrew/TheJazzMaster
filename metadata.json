@@ -1,0 +1,7 @@
+{
+  "name": "JazzMaster AI",
+  "description": "A comprehensive jazz learning tool that transforms how musicians internalize standards using the 'Four T's Method' and AI-powered harmonic analysis.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
