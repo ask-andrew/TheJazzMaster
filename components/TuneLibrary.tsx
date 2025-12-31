@@ -45,12 +45,12 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
         
         <div className="flex gap-4">
            <div className="bg-slate-900/40 px-6 py-3 rounded-2xl border border-slate-800 hidden md:block">
-            <span className="text-xs font-black uppercase tracking-widest text-slate-500">
+            <span className="text-sm font-black uppercase tracking-widest text-slate-500">
               Total Standards: {tunes.length}
             </span>
           </div>
           <div className="bg-sky-500/10 px-6 py-3 rounded-2xl border border-sky-500/20 hidden md:block">
-            <span className="text-xs font-black uppercase tracking-widest text-sky-400">
+            <span className="text-sm font-black uppercase tracking-widest text-sky-400">
               In Development: {tunes.filter(t => t.mastery === 'Learning').length}
             </span>
           </div>
@@ -68,15 +68,15 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
             </div>
          </div>
          <div className="flex-1 text-center md:text-left">
-            <span className="text-[10px] font-black text-sky-400 uppercase tracking-[0.4em] mb-3 block">Daily Priority Shed</span>
-            <h3 className="text-4xl md:text-5xl font-jazz text-white leading-none mb-4 uppercase">{priorityTune.title}</h3>
-            <p className="text-slate-400 font-realbook text-lg italic max-w-xl">"This standard is currently in your 'Learning' phase. Spend 20 minutes here today focusing on guide tone transitions."</p>
+            <span className="text-sm font-black text-sky-400 uppercase tracking-[0.4em] mb-3 block">Daily Priority Shed</span>
+            <h3 className="text-5xl md:text-6xl font-jazz text-white leading-none mb-4 uppercase">{priorityTune.title}</h3>
+            <p className="text-slate-400 font-realbook text-xl italic max-w-xl">"This standard is currently in your 'Learning' phase. Spend 20 minutes here today focusing on guide tone transitions."</p>
          </div>
          <button 
            onClick={() => onSelect(priorityTune, 'PRACTICE')}
-           className="px-10 py-5 bg-sky-500 text-black font-jazz text-2xl rounded-[2rem] hover:bg-white transition-all shadow-xl hover:scale-105 active:scale-95 flex items-center gap-4"
+           className="px-10 py-5 bg-sky-500 text-black font-jazz text-3xl rounded-[2rem] hover:bg-white transition-all shadow-xl hover:scale-105 active:scale-95 flex items-center gap-4"
          >
-           Shed Now <i className="fas fa-arrow-right text-sm"></i>
+           Shed Now <i className="fas fa-arrow-right text-base"></i>
          </button>
       </div>
 
@@ -85,7 +85,7 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest whitespace-nowrap border-2 transition-all ${
+            className={`px-8 py-3 rounded-full text-sm font-black uppercase tracking-widest whitespace-nowrap border-2 transition-all ${
               activeCategory === cat 
                 ? 'bg-sky-500/20 border-sky-400 text-sky-400 shadow-[0_0_20px_rgba(14,165,233,0.2)]' 
                 : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
@@ -110,13 +110,13 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
               <div className="flex justify-between items-start mb-8">
                 <div className="max-w-[70%]">
                   <div className="flex items-center gap-2 mb-1">
-                     {tune.year && <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest bg-slate-800 px-2 py-0.5 rounded">Year {tune.year}</span>}
-                     {tune.style && <span className="text-[9px] font-black text-sky-500 uppercase tracking-widest bg-sky-500/10 px-2 py-0.5 rounded">{tune.style}</span>}
+                     {tune.year && <span className="text-xs font-black text-slate-500 uppercase tracking-widest bg-slate-800 px-2 py-0.5 rounded">Year {tune.year}</span>}
+                     {tune.style && <span className="text-xs font-black text-sky-500 uppercase tracking-widest bg-sky-500/10 px-2 py-0.5 rounded">{tune.style}</span>}
                   </div>
-                  <h3 className="text-4xl font-jazz text-white group-hover:text-sky-400 transition-colors leading-none uppercase">
+                  <h3 className="text-5xl font-jazz text-white group-hover:text-sky-400 transition-colors leading-none uppercase">
                     {tune.title}
                   </h3>
-                  <p className="text-sky-500/60 text-sm mt-2 font-realbook">{tune.composer || 'Standard'}</p>
+                  <p className="text-sky-500/60 text-base mt-2 font-realbook">{tune.composer || 'Standard'}</p>
                 </div>
                 
                 <button 
@@ -126,13 +126,13 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
                     const nextIndex = (currentIndex + 1) % masteryLevels.length;
                     onUpdateMastery(tune.id, masteryLevels[nextIndex]);
                   }}
-                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all hover:scale-105 active:scale-95 ${getMasteryStyles(tune.mastery)}`}
+                  className={`px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest border transition-all hover:scale-105 active:scale-95 ${getMasteryStyles(tune.mastery)}`}
                 >
                   {tune.mastery}
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-y-4 gap-x-8 text-[11px] font-black uppercase tracking-widest text-slate-300 mb-6">
+              <div className="flex flex-wrap gap-y-4 gap-x-8 text-sm font-black uppercase tracking-widest text-slate-300 mb-6">
                 <span className="flex items-center gap-3">
                   <i className="fas fa-key text-sky-500 opacity-50"></i> {formatMusical(tune.key)}
                 </span>
@@ -145,7 +145,7 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
               </div>
 
               {tune.realBookPage && (
-                <div className="flex items-center gap-3 text-[10px] font-black text-slate-600 uppercase tracking-widest border-t border-slate-900 pt-4">
+                <div className="flex items-center gap-3 text-xs font-black text-slate-600 uppercase tracking-widest border-t border-slate-900 pt-4">
                   <i className="fas fa-book-open"></i>
                   <span>Real Book: {tune.realBookPage}</span>
                 </div>
@@ -155,15 +155,15 @@ const TuneLibrary: React.FC<TuneLibraryProps> = ({ tunes, onSelect, onUpdateMast
             <div className="p-6 border-t border-slate-800/50 bg-black/40 rounded-b-[3rem] grid grid-cols-2 gap-4">
               <button 
                 onClick={() => onSelect(tune, 'PRACTICE')}
-                className="flex items-center justify-center gap-3 py-4 bg-slate-900 hover:bg-sky-500 hover:text-black rounded-2xl text-[11px] font-black transition-all uppercase tracking-[0.2em] border border-slate-800/50 shadow-md"
+                className="flex items-center justify-center gap-3 py-4 bg-slate-900 hover:bg-sky-500 hover:text-black rounded-2xl text-base font-black transition-all uppercase tracking-[0.2em] border border-slate-800/50 shadow-md"
               >
-                <i className="fas fa-play text-[9px]"></i> Practice
+                <i className="fas fa-play text-xs"></i> Practice
               </button>
               <button 
                 onClick={() => onSelect(tune, 'STUDY')}
-                className="flex items-center justify-center gap-3 py-4 bg-slate-900 hover:bg-indigo-500 hover:text-white rounded-2xl text-[11px] font-black transition-all uppercase tracking-[0.2em] border border-slate-800/50 shadow-md"
+                className="flex items-center justify-center gap-3 py-4 bg-slate-900 hover:bg-indigo-500 hover:text-white rounded-2xl text-base font-black transition-all uppercase tracking-[0.2em] border border-slate-800/50 shadow-md"
               >
-                <i className="fas fa-brain text-[9px]"></i> Study
+                <i className="fas fa-brain text-xs"></i> Study
               </button>
             </div>
           </div>
