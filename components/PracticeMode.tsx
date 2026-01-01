@@ -60,10 +60,21 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(-1);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [showScaleLayer, setShowScaleLayer] = useState(false);
+  
+  // Dynamic tempo state
+  const [customTempo, setCustomTempo] = useState<number>(() => {
+    return typeof tune.tempo === 'number' ? tune.tempo : parseInt(tune.tempo as string) || 120;
+  });
+
   const audioCtx = useRef<AudioContext | null>(null);
   const measureRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const tuneRequirements = useMemo(() => getRequiredScales(tune), [tune]);
+
+  // Sync tempo when tune changes
+  useEffect(() => {
+    setCustomTempo(typeof tune.tempo === 'number' ? tune.tempo : parseInt(tune.tempo as string) || 120);
+  }, [tune]);
 
   const playClick = (beat: number) => {
     if (!metronomeEnabled) return;
@@ -131,7 +142,6 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
 
   useEffect(() => {
     let interval: any;
-    const tempoVal = typeof tune.tempo === 'number' ? tune.tempo : parseInt(tune.tempo) || 120;
     if (isPlaying) {
       interval = setInterval(() => {
         const totalBeats = activeSections.reduce((acc, s) => acc + s.chords.reduce((bc, c) => bc + c.duration, 0), 0);
@@ -140,13 +150,13 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
           playClick(next % 4);
           return next;
         });
-      }, (60 / tempoVal) * 1000);
+      }, (60 / customTempo) * 1000);
     }
     return () => {
       clearInterval(interval);
       if (!isPlaying) setCurrentBeat(0);
     };
-  }, [isPlaying, tune.tempo, activeSections, metronomeEnabled]);
+  }, [isPlaying, customTempo, activeSections, metronomeEnabled]);
 
   const getPatternForBeat = (beat: number): Pattern | undefined => activePatterns.find(p => beat >= p.startBeat && beat < p.endBeat);
 
@@ -171,7 +181,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
 
   const logSessionMoment = () => {
     const logs = JSON.parse(localStorage.getItem('jazzmaster_logs') || '[]');
-    logs.push({ tune: tune.title, time: new Date().toLocaleTimeString(), note: `Working on ${activeTab === 'chords' ? 'Harmony' : 'Technique'}` });
+    logs.push({ tune: tune.title, time: new Date().toLocaleTimeString(), note: `Working on ${activeTab === 'chords' ? 'Harmony' : 'Technique'} at ${customTempo} BPM` });
     localStorage.setItem('jazzmaster_logs', JSON.stringify(logs));
     alert('Progress logged to Journal!');
   };
@@ -203,11 +213,34 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
             <i className="fas fa-feather-pointed"></i>
           </button>
 
-          <div className="bg-black/40 border border-slate-700 rounded-xl p-1 flex h-10">
-            <button onClick={() => setActiveTab('chords')} className={`px-6 text-[10px] font-black rounded-lg transition-all font-jazz tracking-widest ${activeTab === 'chords' ? 'bg-sky-500 text-black' : 'text-slate-400 hover:text-white'}`}>COMPANION</button>
-            <button onClick={() => setActiveTab('tech')} className={`px-6 text-[10px] font-black rounded-lg transition-all font-jazz tracking-widest ${activeTab === 'tech' ? 'bg-sky-500 text-black' : 'text-slate-400 hover:text-white'}`}>TECHNIQUE</button>
+          {/* Tempo Controls */}
+          <div className="flex items-center gap-2 bg-black/40 border border-slate-700 rounded-xl px-2 h-10 shadow-inner">
+            <button 
+              onClick={() => setCustomTempo(prev => Math.max(40, prev - 2))} 
+              className="text-slate-500 hover:text-sky-400 p-1 transition-colors active:scale-90"
+              title="Slower"
+            >
+              <i className="fas fa-minus text-[10px]"></i>
+            </button>
+            <div className="flex flex-col items-center justify-center min-w-[36px]">
+              <span className="text-sky-400 font-jazz text-base leading-none">{customTempo}</span>
+              <span className="text-[6px] font-black text-slate-500 uppercase tracking-tighter">BPM</span>
+            </div>
+            <button 
+              onClick={() => setCustomTempo(prev => Math.min(300, prev + 2))} 
+              className="text-slate-500 hover:text-sky-400 p-1 transition-colors active:scale-90"
+              title="Faster"
+            >
+              <i className="fas fa-plus text-[10px]"></i>
+            </button>
           </div>
-          <button onClick={() => setIsPlaying(!isPlaying)} className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all shadow-xl ${isPlaying ? 'bg-slate-800 border-2 border-red-500 text-red-500' : 'bg-sky-500 text-black'}`}>
+
+          <div className="bg-black/40 border border-slate-700 rounded-xl p-1 flex h-10">
+            <button onClick={() => setActiveTab('chords')} className={`px-6 text-[10px] font-black rounded-lg transition-all font-jazz tracking-widest ${activeTab === 'chords' ? 'bg-sky-500 text-black shadow-md' : 'text-slate-400 hover:text-white'}`}>COMPANION</button>
+            <button onClick={() => setActiveTab('tech')} className={`px-6 text-[10px] font-black rounded-lg transition-all font-jazz tracking-widest ${activeTab === 'tech' ? 'bg-sky-500 text-black shadow-md' : 'text-slate-400 hover:text-white'}`}>TECHNIQUE</button>
+          </div>
+          
+          <button onClick={() => setIsPlaying(!isPlaying)} className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all shadow-xl ${isPlaying ? 'bg-slate-800 border-2 border-red-500 text-red-500 shadow-red-500/20' : 'bg-sky-500 text-black shadow-sky-500/20'}`}>
             <i className={`fas ${isPlaying ? 'fa-stop' : 'fa-play'}`}></i>
           </button>
         </div>
@@ -346,9 +379,14 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                     <h3 className="text-4xl font-jazz text-white">The DNA Shed</h3>
                     <p className="text-slate-500 font-realbook mt-2">These are the building blocks specifically required for "{tune.title}".</p>
                   </div>
-                  <span className="text-[10px] text-sky-400 font-realbook bg-sky-500/10 px-4 py-1.5 rounded-full border border-sky-500/20 tracking-widest uppercase font-black h-fit">
-                    {formatMusical(transposition)} Instrument
-                  </span>
+                  <div className="flex gap-4">
+                    <span className="text-[10px] text-sky-400 font-realbook bg-sky-500/10 px-4 py-1.5 rounded-full border border-sky-500/20 tracking-widest uppercase font-black h-fit">
+                      {formatMusical(transposition)} Instrument
+                    </span>
+                    <span className="text-[10px] text-amber-400 font-realbook bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/20 tracking-widest uppercase font-black h-fit">
+                      {customTempo} BPM
+                    </span>
+                  </div>
                </div>
                
                <div className="flex flex-col gap-8">
@@ -364,7 +402,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                     <p className="text-lg font-realbook text-slate-600 italic mb-6">"Need more depth? Head to the Study Room for the full Comparative DNA Matrix."</p>
                     <button 
                       onClick={() => (window as any).setActiveMode?.('STUDY')} 
-                      className="px-8 py-3 bg-slate-900 border border-slate-700 text-slate-400 font-jazz text-xl rounded-2xl hover:text-white transition-all"
+                      className="px-8 py-3 bg-slate-900 border border-slate-700 text-slate-400 font-jazz text-xl rounded-2xl hover:text-white transition-all shadow-xl"
                     >
                       Enter Study Room
                     </button>
