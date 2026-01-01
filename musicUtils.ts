@@ -3,9 +3,6 @@ import { Transposition, Pattern, Chord, PatternType } from './types.ts';
 
 const notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-/**
- * Formats musical strings for display (e.g., Bb7 -> B♭7, F#m -> F♯m)
- */
 export function formatMusical(text: string | undefined): string {
   if (!text) return '';
   return text
@@ -33,9 +30,40 @@ function normalizeNote(note: string): string {
   return map[note] || note;
 }
 
-function getRootNote(symbol: string): string {
+export function getRootNote(symbol: string): string {
   const match = symbol.match(/^([A-G][b#]?)/);
   return match ? normalizeNote(match[1]) : '';
+}
+
+export function getRecommendedScale(symbol: string): string {
+  const s = symbol.toLowerCase();
+  const root = getRootNote(symbol);
+  if (s.includes('m7b5')) return `${root} Locrian ♮2`;
+  if (s.includes('7alt')) return `${root} Altered`;
+  if (s.includes('maj7')) return `${root} Lydian`;
+  if (s.includes('m7')) return `${root} Dorian`;
+  if (s.includes('7')) return `${root} Mixolydian`;
+  if (s.includes('m')) return `${root} Melodic Minor`;
+  return `${root} Major`;
+}
+
+export function getGuideTones(symbol: string): { third: string, seventh: string } {
+  const root = getRootNote(symbol);
+  const rootIdx = notes.indexOf(root);
+  const s = symbol.toLowerCase();
+  
+  // Simplified calculation for 3rd and 7th
+  const isMinor = s.includes('m') && !s.includes('maj');
+  const isMaj7 = s.includes('maj7');
+  const isDom7 = s.includes('7') && !s.includes('maj');
+
+  const thirdIdx = (rootIdx + (isMinor ? 3 : 4)) % 12;
+  const seventhIdx = (rootIdx + (isMaj7 ? 11 : (isDom7 || isMinor ? 10 : 11))) % 12;
+
+  return {
+    third: notes[thirdIdx],
+    seventh: notes[seventhIdx]
+  };
 }
 
 function getSemitoneDistance(rootA: string, rootB: string): number {
@@ -45,9 +73,6 @@ function getSemitoneDistance(rootA: string, rootB: string): number {
   return (idxB - idxA + 12) % 12;
 }
 
-/**
- * The "Rules Engine": Automatically identifies jazz harmonic patterns.
- */
 export function analyzeHarmony(chords: Chord[]): Pattern[] {
   const patterns: Pattern[] = [];
   let currentBeat = 0;
@@ -67,7 +92,6 @@ export function analyzeHarmony(chords: Chord[]): Pattern[] {
     const s1 = c1.symbol.toLowerCase();
     const s2 = c2.symbol.toLowerCase();
 
-    // Minor ii-V-i detection (m7b5 -> 7alt/7 -> m7/m)
     if (c3 && (s1.includes('m7b5') || s1.includes('dim'))) {
       const r3 = getRootNote(c3.symbol);
       const s3 = c3.symbol.toLowerCase();
@@ -85,8 +109,6 @@ export function analyzeHarmony(chords: Chord[]): Pattern[] {
       }
     } 
     
-    // Major ii-V-I detection (m7 -> 7 -> maj7/6/7)
-    // Inclusive of dominant 7th resolutions for blues (e.g., Cm7 F7 -> Bb7)
     if (c3 && s1.includes('m7') && !s1.includes('b5') && (s2.endsWith('7') || s2.includes('alt'))) {
       const r3 = getRootNote(c3.symbol);
       const s3 = c3.symbol.toLowerCase();
@@ -106,8 +128,6 @@ export function analyzeHarmony(chords: Chord[]): Pattern[] {
       }
     }
 
-    // Turnaround detection (m7 -> 7)
-    // If not already part of a ii-V-I, mark it as a turnaround
     if (s1.includes('m7') && (s2.endsWith('7') || s2.includes('alt')) && getSemitoneDistance(r1, r2) === 5) {
       const alreadyPatterned = patterns.some(p => currentBeat >= p.startBeat && currentBeat < p.endBeat);
       if (!alreadyPatterned) {
@@ -124,7 +144,6 @@ export function analyzeHarmony(chords: Chord[]): Pattern[] {
 
     currentBeat += c1.duration;
   }
-
   return patterns;
 }
 
