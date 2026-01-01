@@ -104,7 +104,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
       <div className="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-4xl font-jazz text-white">Study Room</h2>
-          <p className="text-zinc-400 mt-2 font-realbook text-xl">Pedagogical Drills: Move knowledge from the page to your ear.</p>
+          <p className="text-zinc-400 mt-2 font-realbook text-lg">Pedagogical Drills: Move knowledge from the page to your ear.</p>
         </div>
         
         <div className="relative w-full sm:w-72">
@@ -112,8 +112,8 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
              onClick={() => setIsSelectorOpen(!isSelectorOpen)}
              className="w-full bg-[#0f172a] border border-slate-800 rounded-2xl px-5 py-4 text-left flex justify-between items-center hover:border-sky-500/50 transition-all shadow-xl"
            >
-             <span className="font-bold text-sky-400 truncate text-lg">{currentTune?.title || 'Select Tune'}</span>
-             <i className={`fas fa-chevron-down text-base transition-transform ${isSelectorOpen ? 'rotate-180' : ''}`}></i>
+             <span className="font-bold text-sky-400 truncate">{currentTune?.title || 'Select Tune'}</span>
+             <i className={`fas fa-chevron-down text-xs transition-transform ${isSelectorOpen ? 'rotate-180' : ''}`}></i>
            </button>
            
            {isSelectorOpen && (
@@ -127,7 +127,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
                       setChunkIndex(0);
                       setShowAnswer(false);
                     }}
-                    className={`w-full text-left px-5 py-4 hover:bg-slate-800 transition-colors text-base border-b border-slate-800/50 last:border-0 ${
+                    className={`w-full text-left px-5 py-4 hover:bg-slate-800 transition-colors text-sm border-b border-slate-800/50 last:border-0 ${
                       tune.id === selectedTuneId ? 'text-sky-400 bg-sky-400/5' : 'text-slate-300'
                     }`}
                   >
@@ -180,8 +180,8 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-black/40 border border-white/5 ${mode.color}`}>
                <i className={`fas ${mode.icon} text-xl`}></i>
             </div>
-            <span className="font-jazz text-2xl text-white mb-2">{mode.label}</span>
-            <span className="text-sm text-zinc-500 uppercase font-black tracking-widest leading-relaxed">{mode.desc}</span>
+            <span className="font-jazz text-xl text-white mb-2">{mode.label}</span>
+            <span className="text-[10px] text-zinc-500 uppercase font-black tracking-widest leading-relaxed">{mode.desc}</span>
           </button>
         ))}
       </div>
@@ -193,10 +193,10 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
            </div>
            
            <div className="max-w-3xl mx-auto text-center">
-              <span className="text-sm font-black uppercase tracking-[0.3em] bg-emerald-500/10 px-6 py-2 rounded-full border border-emerald-500/20">Scale Theory Mastery</span>
+              <span className="text-emerald-500 text-[10px] font-black uppercase tracking-[0.3em] bg-emerald-500/10 px-6 py-2 rounded-full border border-emerald-500/20">Scale Theory Mastery</span>
               
               <div className="mt-12 mb-16">
-                 <h3 className="text-zinc-500 text-lg font-realbook mb-4 italic">Think fast: What scale works best over this chord?</h3>
+                 <h3 className="text-zinc-500 text-sm font-realbook mb-4 italic">Think fast: What scale works best over this chord?</h3>
                  <div className="text-7xl font-bold font-realbook text-white">
                    {formatMusical(transposeChord(allChords[chunkIndex]?.symbol || 'C', transposition))}
                  </div>
@@ -205,32 +205,32 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
               {showAnswer ? (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                   <div className="bg-black/40 p-10 rounded-[2.5rem] border border-emerald-500/20">
-                    <h4 className="text-emerald-400 text-4xl font-jazz tracking-wider mb-2">
+                    <h4 className="text-emerald-400 text-3xl font-jazz tracking-wider mb-2">
                        {formatMusical(getScaleForChord(allChords[chunkIndex]?.symbol).scaleName)}
                     </h4>
                     <div className="flex justify-center gap-3 mb-6">
                       {getScaleForChord(allChords[chunkIndex]?.symbol).intervals.split(' ').map((interval, i) => (
-                        <div key={i} className="w-14 h-14 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xl font-bold text-emerald-300">
+                        <div key={i} className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-300">
                           {formatMusical(interval)}
                         </div>
                       ))}
                     </div>
                     <div className="text-left space-y-4 pt-6 border-t border-slate-800">
-                       <p className="text-slate-300 font-realbook text-xl">
-                         <span className="text-emerald-500 font-black uppercase text-sm tracking-widest block mb-1">Pedagogy Logic</span>
+                       <p className="text-slate-300 font-realbook text-lg">
+                         <span className="text-emerald-500 font-black uppercase text-[10px] tracking-widest block mb-1">Pedagogy Logic</span>
                          {formatMusical(getScaleForChord(allChords[chunkIndex]?.symbol).pedagogy)}
                        </p>
                     </div>
                   </div>
                   
                   <div className="flex justify-center gap-4">
-                    <button onClick={handleNext} className="px-10 py-4 bg-emerald-500 text-black font-jazz text-2xl rounded-2xl hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20">Got it! Next Chord</button>
+                    <button onClick={handleNext} className="px-10 py-4 bg-emerald-500 text-black font-jazz text-xl rounded-2xl hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20">Got it! Next Chord</button>
                   </div>
                 </div>
               ) : (
                 <button 
                   onClick={() => setShowAnswer(true)}
-                  className="px-16 py-6 bg-slate-900 border-2 border-emerald-500/40 text-emerald-400 font-jazz text-3xl rounded-2xl hover:bg-emerald-500 hover:text-black transition-all shadow-2xl"
+                  className="px-16 py-6 bg-slate-900 border-2 border-emerald-500/40 text-emerald-400 font-jazz text-2xl rounded-2xl hover:bg-emerald-500 hover:text-black transition-all shadow-2xl"
                 >
                   Reveal Scale
                 </button>
@@ -241,12 +241,12 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
         <div className="bg-[#0f172a] rounded-[3rem] p-12 border-2 border-slate-800 relative overflow-hidden animate-in fade-in zoom-in duration-300 shadow-2xl">
           <div className="max-w-3xl mx-auto text-center">
             <div className="flex justify-center items-center gap-3 mb-10">
-               <span className="text-amber-500 text-sm font-black uppercase tracking-widest bg-amber-500/10 px-6 py-2 rounded-full border border-amber-500/20">Harmonic Chunking</span>
+               <span className="text-amber-500 text-[10px] font-black uppercase tracking-widest bg-amber-500/10 px-6 py-2 rounded-full border border-amber-500/20">Harmonic Chunking</span>
             </div>
             
             <div className="mb-12">
-              <h3 className="text-4xl font-jazz text-white mb-4">Recall the 4-bar phrase in your head.</h3>
-              <p className="text-zinc-500 font-realbook text-xl italic">Visualization builds a mental bridge to the ear.</p>
+              <h3 className="text-3xl font-jazz text-white mb-4">Recall the 4-bar phrase in your head.</h3>
+              <p className="text-zinc-500 font-realbook text-lg italic">Visualization builds a mental bridge to the ear.</p>
             </div>
 
             <div className="min-h-[160px] flex items-center justify-center mb-12">
@@ -254,15 +254,15 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
                 <div className="animate-in fade-in duration-500 grid grid-cols-2 sm:grid-cols-4 gap-6 w-full">
                   {chunks[chunkIndex]?.map((chord: Chord, i: number) => (
                     <div key={i} className="bg-black/40 border-2 border-amber-500/30 rounded-[2rem] p-8 flex flex-col items-center justify-center aspect-square shadow-inner group hover:border-amber-500 transition-all">
-                       <span className="text-5xl font-bold font-realbook text-amber-500 group-hover:scale-110 transition-transform">{formatMusical(transposeChord(chord.symbol, transposition))}</span>
-                       <span className="text-xs text-zinc-600 font-black mt-4 uppercase tracking-tighter">Measure {i+1}</span>
+                       <span className="text-4xl font-bold font-realbook text-amber-500 group-hover:scale-110 transition-transform">{formatMusical(transposeChord(chord.symbol, transposition))}</span>
+                       <span className="text-[10px] text-zinc-600 font-black mt-4 uppercase tracking-tighter">Measure {i+1}</span>
                     </div>
                   ))}
                 </div>
               ) : (
                 <button 
                   onClick={() => setShowAnswer(true)}
-                  className="px-16 py-6 bg-amber-500 text-black font-jazz text-3xl rounded-2xl hover:bg-amber-400 transition-all shadow-2xl shadow-amber-500/20 uppercase tracking-widest"
+                  className="px-16 py-6 bg-amber-500 text-black font-jazz text-2xl rounded-2xl hover:bg-amber-400 transition-all shadow-2xl shadow-amber-500/20 uppercase tracking-widest"
                 >
                   Recall Chords
                 </button>
@@ -272,7 +272,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
             <div className="flex justify-center gap-6">
               <button 
                 onClick={handleNext}
-                className="px-10 py-4 bg-slate-900 border border-slate-800 text-slate-500 hover:text-white transition-colors text-sm font-black uppercase tracking-widest rounded-2xl"
+                className="px-10 py-4 bg-slate-900 border border-slate-800 text-slate-500 hover:text-white transition-colors text-xs font-black uppercase tracking-widest rounded-2xl"
               >
                 Next Chunk
               </button>
@@ -282,7 +282,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
       ) : activeQuiz === 'VISUALIZATION' && currentTune ? (
         <div className="bg-[#0f172a] rounded-[3rem] p-12 border-2 border-slate-800 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="text-center max-w-2xl mx-auto">
-            <span className="text-blue-500 text-sm font-black uppercase tracking-widest bg-blue-500/10 px-6 py-2 rounded-full border border-blue-500/20">Guide Tone Vision</span>
+            <span className="text-blue-500 text-[10px] font-black uppercase tracking-widest bg-blue-500/10 px-6 py-2 rounded-full border border-blue-500/20">Guide Tone Vision</span>
 
             <div className="mt-12 mb-12 bg-black/40 p-16 rounded-[3rem] border-2 border-slate-900 shadow-inner">
                <div className="text-7xl font-bold font-realbook text-blue-400 mb-8">
@@ -292,29 +292,29 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
                {flashcardStep > 0 ? (
                  <div className="animate-in fade-in duration-500 text-zinc-300 space-y-6">
                    <div className="flex flex-col items-center">
-                     <span className="text-sm font-black text-slate-500 uppercase tracking-widest mb-4">Visualize Fingerings</span>
+                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Visualize Fingerings</span>
                      <div className="bg-sky-500/10 border border-sky-500/20 px-8 py-4 rounded-2xl">
-                        <p className="text-3xl font-jazz text-sky-400">Identify 3rd & 7th</p>
+                        <p className="text-2xl font-jazz text-sky-400">Identify 3rd & 7th</p>
                      </div>
                    </div>
                  </div>
                ) : (
                  <button 
                    onClick={() => setFlashcardStep(1)}
-                   className="text-sm font-black text-zinc-600 uppercase tracking-[0.3em] hover:text-blue-400 transition-colors bg-white/5 px-6 py-2 rounded-full border border-white/5"
+                   className="text-xs font-black text-zinc-600 uppercase tracking-[0.3em] hover:text-blue-400 transition-colors bg-white/5 px-6 py-2 rounded-full border border-white/5"
                  >
                    Verify Guide Tones
                  </button>
                )}
             </div>
 
-            <button onClick={handleNext} className="px-10 py-4 bg-blue-600 text-white font-jazz text-2xl rounded-2xl hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/20">Next Chord</button>
+            <button onClick={handleNext} className="px-10 py-4 bg-blue-600 text-white font-jazz text-xl rounded-2xl hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/20">Next Chord</button>
           </div>
         </div>
       ) : activeQuiz === 'FORM' && currentTune ? (
         <div className="bg-[#0f172a] rounded-[3rem] p-12 border-2 border-slate-800 relative animate-in fade-in duration-300">
            <div className="text-center max-w-2xl mx-auto">
-            <span className="text-purple-500 text-sm font-black uppercase tracking-widest bg-purple-500/10 px-6 py-2 rounded-full border border-purple-500/20">Roadmap Recall</span>
+            <span className="text-purple-500 text-[10px] font-black uppercase tracking-widest bg-purple-500/10 px-6 py-2 rounded-full border border-purple-500/20">Roadmap Recall</span>
 
             <div className="mt-12 mb-12 min-h-[160px] flex flex-col items-center justify-center">
               {showAnswer ? (
@@ -322,28 +322,28 @@ const StudyMode: React.FC<StudyModeProps> = ({ tunes, transposition, selectedTun
                   <div className="text-8xl font-bold font-jazz text-purple-400 tracking-tighter">{currentTune.form}</div>
                   <div className="flex flex-wrap justify-center gap-4">
                     {currentTune.sections.map(s => (
-                      <span key={s.id} className="bg-slate-900 px-6 py-3 rounded-2xl text-xs font-black text-slate-400 border border-slate-800 uppercase tracking-widest">{s.name} Section</span>
+                      <span key={s.id} className="bg-slate-900 px-6 py-3 rounded-2xl text-[10px] font-black text-slate-400 border border-slate-800 uppercase tracking-widest">{s.name} Section</span>
                     ))}
                   </div>
                 </div>
               ) : (
                 <button 
                   onClick={() => setShowAnswer(true)}
-                  className="px-16 py-6 bg-purple-600 text-white font-jazz text-3xl rounded-2xl hover:bg-purple-500 transition-all shadow-2xl"
+                  className="px-16 py-6 bg-purple-600 text-white font-jazz text-2xl rounded-2xl hover:bg-purple-500 transition-all shadow-2xl"
                 >
                   Reveal Roadmap
                 </button>
               )}
             </div>
 
-            <button onClick={handleNext} className="px-10 py-4 bg-slate-900 border border-slate-800 text-slate-500 hover:text-white font-black uppercase tracking-widest text-sm rounded-2xl">Skip Tune</button>
+            <button onClick={handleNext} className="px-10 py-4 bg-slate-900 border border-slate-800 text-slate-500 hover:text-white font-black uppercase tracking-widest text-[10px] rounded-2xl">Skip Tune</button>
           </div>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-40 bg-[#0f172a]/20 rounded-[4rem] border-4 border-dashed border-slate-800 text-slate-800 group">
            <i className="fas fa-graduation-cap text-9xl mb-8 opacity-5 group-hover:opacity-10 transition-opacity"></i>
-           <p className="text-3xl font-jazz tracking-widest uppercase opacity-40">Select a Pedagogical Mode</p>
-           <p className="text-slate-700 font-realbook mt-4 max-w-sm text-center text-base italic">These exercises are designed to move knowledge from the "page" into your subconscious "ear".</p>
+           <p className="text-2xl font-jazz tracking-widest uppercase opacity-40">Select a Pedagogical Mode</p>
+           <p className="text-slate-700 font-realbook mt-4 max-w-sm text-center italic">These exercises are designed to move knowledge from the "page" into your subconscious "ear".</p>
         </div>
       )}
     </div>

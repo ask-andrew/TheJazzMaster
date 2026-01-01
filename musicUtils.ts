@@ -28,12 +28,12 @@ export function transposeChord(chordSymbol: string, to: Transposition): string {
   return notes[newIndex] + extension;
 }
 
-export function normalizeNote(note: string): string {
+function normalizeNote(note: string): string {
   const map: Record<string, string> = { 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb' };
   return map[note] || note;
 }
 
-export function getRootNote(symbol: string): string {
+function getRootNote(symbol: string): string {
   const match = symbol.match(/^([A-G][b#]?)/);
   return match ? normalizeNote(match[1]) : '';
 }
@@ -44,43 +44,6 @@ function getSemitoneDistance(rootA: string, rootB: string): number {
   if (idxA === -1 || idxB === -1) return -1;
   return (idxB - idxA + 12) % 12;
 }
-
-/**
- * Checks if a given key string indicates a minor key.
- * @param key The key string (e.g., "G minor", "Cm").
- * @returns True if the key is minor, false otherwise.
- */
-export function isMinorKey(key: string): boolean {
-  const lowerKey = key.toLowerCase();
-  return lowerKey.includes('minor') || lowerKey.endsWith('m');
-}
-
-/**
- * Gets the root note of the V7 chord for a given minor key.
- * @param minorKeyRoot The root note of the minor key (concert pitch).
- * @returns The root note of the V7 chord (concert pitch).
- */
-export function getV7RootForMinorKey(minorKeyRoot: string): string {
-  const rootIndex = notes.indexOf(normalizeNote(minorKeyRoot));
-  if (rootIndex === -1) return '';
-  // V7 is 7 semitones up from the root (perfect fifth)
-  const v7RootIndex = (rootIndex + 7) % 12;
-  return notes[v7RootIndex];
-}
-
-/**
- * Gets the root note of the ii chord for a given major key.
- * @param majorKeyRoot The root note of the major key (concert pitch).
- * @returns The root note of the ii chord (concert pitch).
- */
-export function getIiRootForMajorKey(majorKeyRoot: string): string {
-  const rootIndex = notes.indexOf(normalizeNote(majorKeyRoot));
-  if (rootIndex === -1) return '';
-  // ii is 2 semitones up from the root (major second)
-  const iiRootIndex = (rootIndex + 2) % 12;
-  return notes[iiRootIndex];
-}
-
 
 /**
  * The "Rules Engine": Automatically identifies jazz harmonic patterns.
