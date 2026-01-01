@@ -47,12 +47,20 @@ export function getRecommendedScale(symbol: string): string {
   return `${root} Major`;
 }
 
+export function getScalePath(type: PatternType): string {
+  switch(type) {
+    case 'ii-V-I': return 'Dorian → Mixolydian → Ionian';
+    case 'minor-ii-V-i': return 'Locrian ♮2 → Altered → Melodic m';
+    case 'turnaround': return 'I → VI (Dom) → ii → V';
+    default: return '';
+  }
+}
+
 export function getGuideTones(symbol: string): { third: string, seventh: string } {
   const root = getRootNote(symbol);
   const rootIdx = notes.indexOf(root);
   const s = symbol.toLowerCase();
   
-  // Simplified calculation for 3rd and 7th
   const isMinor = s.includes('m') && !s.includes('maj');
   const isMaj7 = s.includes('maj7');
   const isDom7 = s.includes('7') && !s.includes('maj');
