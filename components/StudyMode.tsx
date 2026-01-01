@@ -46,15 +46,15 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
              <div className="flex gap-4">
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]"></div>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Flats</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Accidental (♭)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]"></div>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Naturals</span>
+                    <div className="w-3 h-3 rounded-full bg-slate-700"></div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Natural</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]"></div>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Sharps</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Accidental (♯)</span>
                 </div>
              </div>
 
@@ -92,11 +92,11 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
               <div className="text-left">Scale Identity</div>
               <div>1</div>
               <div>2</div>
-              <div className="text-sky-400">3</div>
+              <div>3</div>
               <div>4</div>
               <div>5</div>
-              <div className="text-sky-400">6</div>
-              <div className="text-sky-400">7</div>
+              <div>6</div>
+              <div>7</div>
               <div className="text-amber-400">8 (PT)</div>
               <div className="text-right">Shed Tip / Form</div>
             </div>
@@ -136,14 +136,12 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
                       const deg = scale.degrees[dIdx];
                       if (!deg) return <div key={dIdx} className="h-12 rounded-xl border-2 border-dashed border-slate-800/10 opacity-10"></div>;
 
-                      const isSignificant = [2, 5, 6].includes(dIdx);
-                      let colorClass = 'bg-slate-900 border-slate-800 text-slate-500';
-                      if (deg.includes('b')) colorClass = 'bg-rose-500/10 border-rose-500/30 text-rose-400';
-                      else if (deg.includes('#')) colorClass = 'bg-amber-500/10 border-amber-500/30 text-amber-400';
-                      else if (['3', '6', '7'].includes(deg)) colorClass = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400';
+                      let colorClass = 'bg-slate-900 border-slate-800 text-slate-500'; // Natural
+                      if (deg.includes('b')) colorClass = 'bg-rose-500/15 border-rose-500/40 text-rose-300';
+                      else if (deg.includes('#')) colorClass = 'bg-amber-500/15 border-amber-500/40 text-amber-300';
                       
                       return (
-                        <div key={dIdx} className={`h-12 rounded-xl flex items-center justify-center font-bold border-2 transition-all ${colorClass} ${isSignificant ? 'scale-105 shadow-md' : 'opacity-60'}`}>
+                        <div key={dIdx} className={`h-12 rounded-xl flex items-center justify-center font-bold border-2 transition-all ${colorClass}`}>
                           {formatMusical(deg)}
                         </div>
                       );

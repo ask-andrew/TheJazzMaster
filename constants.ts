@@ -85,7 +85,16 @@ export const INITIAL_TUNES: Tune[] = [
         { chord: "Am7b5" }, { chord: "D7alt" }, { chord: "Gm6" }, { chord: "G7alt" }
       ])
     ],
-    variants: [],
+    variants: [
+      {
+        name: 'Basic Changes',
+        description: 'Simplified diatonic movement without extensions.',
+        sections: createSectionsSimple({
+          "A": ["Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7", "Gm", "Gm"],
+          "B": ["Am7b5", "D7", "Gm", "Gm", "Cm7", "F7", "Bbmaj7", "Ebmaj7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       recommendedLoops: [{ name: "Minor ii-V-i", bars: [5, 8], focus: "Internalizing Locrian Natural 2 to Altered" }],
@@ -111,7 +120,15 @@ export const INITIAL_TUNES: Tune[] = [
         { chord: "Dm7b5" }, { chord: "G7alt" }, { chord: "Cm7" }, { chord: "C7alt" }
       ])
     ],
-    variants: [],
+    variants: [
+      {
+        name: 'Standard (Clean)',
+        description: 'No altered turnarounds.',
+        sections: createSectionsSimple({
+          "Chorus": ["Cm7", "Fm7", "Dm7b5", "G7", "Cm7", "Fm7", "Dm7b5", "G7", "Ebm7", "Ab7", "Dbmaj7", "Dbmaj7", "Dm7b5", "G7", "Cm7", "G7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       recommendedLoops: [{ name: "The Modulation", bars: [9, 12], focus: "Half step shift up to Db Major" }],
@@ -295,7 +312,15 @@ export const INITIAL_TUNES: Tune[] = [
     sections: createSectionsSimple({
       "Chorus": ["Fmaj7", "Em7b5 A7", "Dm7 G7", "Cm7 F7", "Bb7", "Bbm7 Eb7", "Am7 D7", "Abm7 Db7", "Gm7", "C7", "Fmaj7 D7", "Gm7 C7"]
     }),
-    variants: [],
+    variants: [
+      {
+        name: 'Basic 12-Bar',
+        description: 'Standard F blues for beginner practice.',
+        sections: createSectionsSimple({
+          "Chorus": ["F7", "Bb7", "F7", "F7", "Bb7", "Bb7", "F7", "D7", "Gm7", "C7", "F7", "C7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       recommendedLoops: [{ name: "Bebop Descent", bars: [2, 5], focus: "Em7b5-A7-Dm7-G7-Cm7-F7" }]
@@ -316,15 +341,11 @@ export const INITIAL_TUNES: Tune[] = [
     }),
     variants: [
       { 
-        name: 'Basic', 
-        description: 'Standard Bb blues changes',
-        sections: [
-          createSectionDetailed("tm-b-chorus", "chorus", [
-            { chord: "Bb7" }, { chord: "Eb7" }, { chord: "Bb7" }, { chord: "Bb7" },
-            { chord: "Eb7" }, { chord: "Eb7" }, { chord: "Bb7" }, { chord: "Bb7" },
-            { chord: "F7" }, { chord: "Eb7" }, { chord: "Bb7" }, { chord: "F7" }
-          ])
-        ]
+        name: 'Basic Blues', 
+        description: 'Standard 1-4-5 Bb blues changes',
+        sections: createSectionsSimple({
+          "Chorus": ["Bb7", "Eb7", "Bb7", "Bb7", "Eb7", "Eb7", "Bb7", "Bb7", "F7", "Eb7", "Bb7", "F7"]
+        })
       }
     ],
     patterns: [],

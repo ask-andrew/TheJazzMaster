@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout.tsx';
 import TuneLibrary from './components/TuneLibrary.tsx';
 import PracticeMode from './components/PracticeMode.tsx';
@@ -13,6 +13,11 @@ const App: React.FC = () => {
   const [transposition, setTransposition] = useState<Transposition>('C');
   const [tunes, setTunes] = useState<Tune[]>(INITIAL_TUNES);
   const [selectedTuneId, setSelectedTuneId] = useState<string | undefined>(INITIAL_TUNES[0].id);
+
+  // Expose navigation to window for deep components (e.g. Study Room button)
+  useEffect(() => {
+    (window as any).setActiveMode = (mode: AppMode) => setActiveMode(mode);
+  }, []);
 
   const activeTune = tunes.find(t => t.id === selectedTuneId) || tunes[0];
 

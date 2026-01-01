@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Tune, PatternType, Transposition, Pattern, Section, Chord } from '../types.ts';
+import { Tune, PatternType, Transposition, Pattern, Section, Chord, AppMode } from '../types.ts';
 import { getPracticeSuggestions } from '../geminiService.ts';
 import { SCALE_DATA, SCALE_DEGREES } from '../constants.ts';
 import { transposeChord, analyzeHarmony, formatMusical, getRecommendedScale, getGuideTones, getRequiredScales } from '../musicUtils.ts';
@@ -36,9 +36,8 @@ const ScaleDNAItem: React.FC<{ scale: typeof SCALE_DEGREES[0], tip?: string }> =
       <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
         {scale.degrees.map((deg, i) => {
           let colorClass = 'bg-slate-900 border-slate-800 text-slate-500';
-          if (deg.includes('b')) colorClass = 'bg-rose-500/10 border-rose-500/30 text-rose-400';
-          else if (deg.includes('#')) colorClass = 'bg-amber-500/10 border-amber-500/30 text-amber-400';
-          else if (['3', '6', '7'].includes(deg)) colorClass = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400';
+          if (deg.includes('b')) colorClass = 'bg-rose-500/20 border-rose-500/40 text-rose-300';
+          else if (deg.includes('#')) colorClass = 'bg-amber-500/20 border-amber-500/40 text-amber-300';
           
           return (
             <div key={i} className="flex flex-col items-center">
@@ -60,6 +59,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(-1);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [showScaleLayer, setShowScaleLayer] = useState(false);
+  const [isVariantPickerOpen, setIsVariantPickerOpen] = useState(false);
   
   // Dynamic tempo state
   const [customTempo, setCustomTempo] = useState<number>(() => {
@@ -74,6 +74,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   // Sync tempo when tune changes
   useEffect(() => {
     setCustomTempo(typeof tune.tempo === 'number' ? tune.tempo : parseInt(tune.tempo as string) || 120);
+    setSelectedVariantIndex(-1); // Reset variant on tune change
   }, [tune]);
 
   const playClick = (beat: number) => {
@@ -204,6 +205,37 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Variant Selector */}
+          <div className="relative h-10">
+            <button 
+              onClick={() => setIsVariantPickerOpen(!isVariantPickerOpen)}
+              className="px-4 h-full bg-slate-900/40 border border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-all flex items-center gap-2"
+            >
+              <i className="fas fa-layer-group text-sky-500"></i>
+              {selectedVariantIndex === -1 ? 'Standard Changes' : tune.variants[selectedVariantIndex]?.name}
+              <i className={`fas fa-chevron-down text-[8px] transition-transform ${isVariantPickerOpen ? 'rotate-180' : ''}`}></i>
+            </button>
+            {isVariantPickerOpen && (
+              <div className="absolute top-full right-0 mt-2 w-56 bg-[#080c1d] border border-slate-700 rounded-xl shadow-2xl z-50 py-1 overflow-hidden">
+                <button 
+                  onClick={() => { setSelectedVariantIndex(-1); setIsVariantPickerOpen(false); }}
+                  className={`w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-colors ${selectedVariantIndex === -1 ? 'text-sky-400' : 'text-slate-500'}`}
+                >
+                  Standard Changes
+                </button>
+                {tune.variants && tune.variants.map((v, i) => (
+                  <button 
+                    key={i}
+                    onClick={() => { setSelectedVariantIndex(i); setIsVariantPickerOpen(false); }}
+                    className={`w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 border-t border-slate-800/50 transition-colors ${selectedVariantIndex === i ? 'text-sky-400' : 'text-slate-500'}`}
+                  >
+                    {v.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button onClick={() => setShowScaleLayer(!showScaleLayer)} className={`px-4 h-10 rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border ${showScaleLayer ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
             <i className="fas fa-microscope text-xs"></i>
             DNA View
@@ -401,7 +433,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                   <div className="mt-12 p-10 bg-black/40 border-2 border-dashed border-slate-800 rounded-[3rem] text-center">
                     <p className="text-lg font-realbook text-slate-600 italic mb-6">"Need more depth? Head to the Study Room for the full Comparative DNA Matrix."</p>
                     <button 
-                      onClick={() => (window as any).setActiveMode?.('STUDY')} 
+                      onClick={() => (window as any).setActiveMode?.(AppMode.STUDY)} 
                       className="px-8 py-3 bg-slate-900 border border-slate-700 text-slate-400 font-jazz text-xl rounded-2xl hover:text-white transition-all shadow-xl"
                     >
                       Enter Study Room
