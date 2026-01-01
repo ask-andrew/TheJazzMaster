@@ -1,5 +1,5 @@
 
-import { Transposition, Pattern, Chord, PatternType } from './types.ts';
+import { Transposition, Pattern, Chord, PatternType, Tune } from './types.ts';
 
 const notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
@@ -38,13 +38,49 @@ export function getRootNote(symbol: string): string {
 export function getRecommendedScale(symbol: string): string {
   const s = symbol.toLowerCase();
   const root = getRootNote(symbol);
+  
   if (s.includes('m7b5')) return `${root} Locrian ♮2`;
   if (s.includes('7alt')) return `${root} Altered`;
-  if (s.includes('maj7')) return `${root} Lydian`;
+  if (s.includes('maj7')) return `${root} Lydian / Major`;
   if (s.includes('m7')) return `${root} Dorian`;
   if (s.includes('7')) return `${root} Mixolydian`;
   if (s.includes('m')) return `${root} Melodic Minor`;
   return `${root} Major`;
+}
+
+/**
+ * Returns a map of scale names found in the tune and their first occurrence measure.
+ */
+export function getRequiredScales(tune: Tune): Map<string, string> {
+  const scaleMap = new Map<string, string>();
+  let currentMeasure = 1;
+  let beatCount = 0;
+
+  tune.sections.forEach(section => {
+    section.chords.forEach(chord => {
+      const s = chord.symbol.toLowerCase();
+      let scaleType = 'Ionian (Major)';
+      
+      if (s.includes('m7b5')) scaleType = 'Locrian ♮2';
+      else if (s.includes('7alt') || s.includes('alt')) scaleType = 'Altered';
+      else if (s.includes('maj7')) scaleType = 'Lydian';
+      else if (s.includes('m7')) scaleType = 'Dorian';
+      else if (s.includes('7')) scaleType = 'Mixolydian';
+      else if (s.includes('m')) scaleType = 'Melodic Minor';
+
+      if (!scaleMap.has(scaleType)) {
+        scaleMap.set(scaleType, `First seen in ${section.name} (Meas. ${currentMeasure})`);
+      }
+
+      beatCount += chord.duration;
+      if (beatCount >= 4) {
+        currentMeasure += Math.floor(beatCount / 4);
+        beatCount = beatCount % 4;
+      }
+    });
+  });
+
+  return scaleMap;
 }
 
 export function getScalePath(type: PatternType): string {

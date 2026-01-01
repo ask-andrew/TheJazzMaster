@@ -2,32 +2,53 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Tune, PatternType, Transposition, Pattern, Section, Chord } from '../types.ts';
 import { getPracticeSuggestions } from '../geminiService.ts';
-import { SCALE_DATA } from '../constants.ts';
-import { transposeChord, analyzeHarmony, formatMusical, getRecommendedScale, getGuideTones, getScalePath } from '../musicUtils.ts';
+import { SCALE_DATA, SCALE_DEGREES } from '../constants.ts';
+import { transposeChord, analyzeHarmony, formatMusical, getRecommendedScale, getGuideTones, getRequiredScales } from '../musicUtils.ts';
 
 interface PracticeModeProps { tune: Tune; transposition: Transposition; }
-interface Measure { chords: Chord[]; startBeat: number; }
+interface Measure { chords: Chord[]; startBeat: number; index: number; }
 
-const ScaleDiagram: React.FC<{ intervals: string }> = ({ intervals }) => {
-  const pts = intervals.split(' ');
+const ScaleDNAItem: React.FC<{ scale: typeof SCALE_DEGREES[0], tip?: string }> = ({ scale, tip }) => {
   return (
-    <div className="flex flex-wrap gap-3 mt-4 items-center">
-      {pts.map((p, i) => (
-        <div key={i} className="flex items-center">
-          <div className="flex flex-col items-center">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-md font-bold border-2 transition-all shadow-md ${
-              p.includes('b') || p.includes('#') ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-sky-500 border-sky-400 text-black'
-            }`}>
-              {formatMusical(p)}
-            </div>
+    <div className="bg-[#0f172a] border border-slate-800 p-8 rounded-[2.5rem] shadow-xl hover:border-sky-500/30 transition-all group overflow-hidden">
+      <div className="flex flex-col md:flex-row justify-between gap-6 mb-8">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h4 className="text-3xl font-jazz text-sky-400 tracking-wide leading-none">{scale.name}</h4>
+            {tip && <div className="w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,1)]"></div>}
           </div>
-          {i < pts.length - 1 && (
-            <div className="mx-2 text-slate-700">
-              <i className="fas fa-chevron-right text-[10px] opacity-20"></i>
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {scale.tags?.map(t => (
+              <span key={t} className="text-[8px] font-black text-slate-500 uppercase tracking-tighter border border-slate-800 px-2 py-0.5 rounded">
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
-      ))}
+        {tip && (
+          <div className="bg-sky-500/5 border border-sky-500/20 px-6 py-4 rounded-2xl flex-1 max-w-md">
+            <span className="text-[9px] font-black text-sky-500 uppercase tracking-widest block mb-2">Tune Strategy</span>
+            <p className="text-md font-realbook text-slate-300 italic">"{tip}"</p>
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+        {scale.degrees.map((deg, i) => {
+          let colorClass = 'bg-slate-900 border-slate-800 text-slate-500';
+          if (deg.includes('b')) colorClass = 'bg-rose-500/10 border-rose-500/30 text-rose-400';
+          else if (deg.includes('#')) colorClass = 'bg-amber-500/10 border-amber-500/30 text-amber-400';
+          else if (['3', '6', '7'].includes(deg)) colorClass = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400';
+          
+          return (
+            <div key={i} className="flex flex-col items-center">
+              <div className={`w-full h-12 rounded-xl flex items-center justify-center font-bold border-2 transition-all ${colorClass} text-sm`}>
+                {formatMusical(deg)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -35,13 +56,14 @@ const ScaleDiagram: React.FC<{ intervals: string }> = ({ intervals }) => {
 const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
-  const [aiSuggestions, setAiSuggestions] = useState<any>(null);
-  const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [activeTab, setActiveTab] = useState<'chords' | 'tech'>('chords');
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(-1);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [showScaleLayer, setShowScaleLayer] = useState(false);
   const audioCtx = useRef<AudioContext | null>(null);
+  const measureRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const tuneRequirements = useMemo(() => getRequiredScales(tune), [tune]);
 
   const playClick = (beat: number) => {
     if (!metronomeEnabled) return;
@@ -60,7 +82,9 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   };
 
   const activeSections = useMemo(() => {
-    if (tune.variants && tune.variants.length > 0 && tune.variants[selectedVariantIndex]) return tune.variants[selectedVariantIndex].sections;
+    if (selectedVariantIndex >= 0 && tune.variants && tune.variants[selectedVariantIndex]) {
+      return tune.variants[selectedVariantIndex].sections;
+    }
     return tune.sections;
   }, [tune, selectedVariantIndex]);
 
@@ -68,6 +92,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
 
   const groupedSections = useMemo(() => {
     let globalBeatOffset = 0;
+    let measureCounter = 0;
     return activeSections.map(section => {
       const measures: Measure[] = [];
       let currentMeasureChords: Chord[] = [];
@@ -77,7 +102,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
         currentMeasureChords.push(chord);
         currentMeasureBeats += chord.duration;
         if (currentMeasureBeats >= 4) {
-          measures.push({ chords: [...currentMeasureChords], startBeat: measureStartBeat });
+          measures.push({ chords: [...currentMeasureChords], startBeat: measureStartBeat, index: measureCounter++ });
           globalBeatOffset += 4;
           measureStartBeat = globalBeatOffset;
           currentMeasureChords = [];
@@ -85,12 +110,24 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
         }
       });
       if (currentMeasureChords.length > 0) {
-        measures.push({ chords: currentMeasureChords, startBeat: measureStartBeat });
+        measures.push({ chords: currentMeasureChords, startBeat: measureStartBeat, index: measureCounter++ });
         globalBeatOffset += currentMeasureBeats;
       }
       return { ...section, measures };
     });
   }, [activeSections]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const activeMeasureIndex = groupedSections.flatMap(s => s.measures).find(m => currentBeat >= m.startBeat && currentBeat < m.startBeat + 4)?.index;
+    if (activeMeasureIndex !== undefined) {
+      const el = measureRefs.current[activeMeasureIndex];
+      if (el) {
+        if (activeMeasureIndex === 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+        else el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [currentBeat, isPlaying, groupedSections]);
 
   useEffect(() => {
     let interval: any;
@@ -105,16 +142,12 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
         });
       }, (60 / tempoVal) * 1000);
     }
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (!isPlaying) setCurrentBeat(0);
+    };
   }, [isPlaying, tune.tempo, activeSections, metronomeEnabled]);
 
-  const loadAiSuggestions = async () => {
-    setIsLoadingAi(true);
-    setAiSuggestions(await getPracticeSuggestions(tune, transposition));
-    setIsLoadingAi(false);
-  };
-
-  const getActivePattern = useMemo(() => activePatterns.find(p => currentBeat >= p.startBeat && currentBeat < p.endBeat), [activePatterns, currentBeat]);
   const getPatternForBeat = (beat: number): Pattern | undefined => activePatterns.find(p => beat >= p.startBeat && beat < p.endBeat);
 
   const getPatternTheme = (type: PatternType) => {
@@ -127,14 +160,20 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   };
 
   const getFunctionalColor = (chord: string, isCurrent: boolean) => {
-    if (isCurrent) return 'bg-sky-500 border-sky-300 shadow-[0_0_50px_rgba(14,165,233,0.5)] scale-105 z-20';
-    
+    if (isCurrent) return 'bg-sky-500 border-sky-300 shadow-[0_0_50px_rgba(14,165,233,0.6)] scale-105 z-20';
     const s = chord.toLowerCase();
     if (s.includes('m7b5')) return 'bg-rose-900/50 border-rose-500/50';
     if (s.includes('m7')) return 'bg-sky-900/50 border-sky-500/50';
     if (s.includes('7')) return 'bg-amber-900/50 border-amber-500/50';
     if (s.includes('maj7') || s.includes('6') || s.includes('maj')) return 'bg-emerald-900/50 border-emerald-500/50';
     return 'bg-slate-900 border-slate-800';
+  };
+
+  const logSessionMoment = () => {
+    const logs = JSON.parse(localStorage.getItem('jazzmaster_logs') || '[]');
+    logs.push({ tune: tune.title, time: new Date().toLocaleTimeString(), note: `Working on ${activeTab === 'chords' ? 'Harmony' : 'Technique'}` });
+    localStorage.setItem('jazzmaster_logs', JSON.stringify(logs));
+    alert('Progress logged to Journal!');
   };
 
   return (
@@ -159,9 +198,11 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
             <i className="fas fa-microscope text-xs"></i>
             DNA View
           </button>
-          <button onClick={() => setMetronomeEnabled(!metronomeEnabled)} className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm transition-all border ${metronomeEnabled ? 'bg-sky-500/20 border-sky-500/40 text-sky-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
-            <i className={`fas ${metronomeEnabled ? 'fa-volume-high' : 'fa-volume-mute'}`}></i>
+          
+          <button onClick={logSessionMoment} className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-sky-400 border border-slate-700 hover:border-sky-500 transition-all">
+            <i className="fas fa-feather-pointed"></i>
           </button>
+
           <div className="bg-black/40 border border-slate-700 rounded-xl p-1 flex h-10">
             <button onClick={() => setActiveTab('chords')} className={`px-6 text-[10px] font-black rounded-lg transition-all font-jazz tracking-widest ${activeTab === 'chords' ? 'bg-sky-500 text-black' : 'text-slate-400 hover:text-white'}`}>COMPANION</button>
             <button onClick={() => setActiveTab('tech')} className={`px-6 text-[10px] font-black rounded-lg transition-all font-jazz tracking-widest ${activeTab === 'tech' ? 'bg-sky-500 text-black' : 'text-slate-400 hover:text-white'}`}>TECHNIQUE</button>
@@ -172,7 +213,7 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 md:p-8">
+      <div className="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
         <div className="max-w-6xl mx-auto pb-48">
           {activeTab === 'chords' ? (
             <div className="flex flex-col gap-12">
@@ -184,24 +225,24 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                       <div className="w-[1.5px] flex-1 bg-slate-800/10 rounded-full"></div>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                      {section.measures.map((measure, mIdx) => {
+                      {section.measures.map((measure) => {
                         const isCurrentBar = isPlaying && currentBeat >= measure.startBeat && currentBeat < measure.startBeat + 4;
                         const pattern = getPatternForBeat(measure.startBeat);
                         const isPatternStart = pattern && pattern.startBeat === measure.startBeat;
                         const theme = pattern ? getPatternTheme(pattern.type) : null;
                         
                         return (
-                          <div key={mIdx} className={`relative h-44 md:h-56 rounded-[2.5rem] border-2 transition-all duration-300 flex flex-col items-center justify-center overflow-hidden shadow-2xl ${theme ? `${theme.bg} ${theme.border} ${theme.glow}` : getFunctionalColor(measure.chords[0].symbol, isCurrentBar)}`}>
+                          <div 
+                            key={measure.index} 
+                            ref={(el) => (measureRefs.current[measure.index] = el)}
+                            className={`relative h-44 md:h-56 rounded-[2.5rem] border-2 transition-all duration-300 flex flex-col items-center justify-center overflow-hidden shadow-2xl ${theme ? `${theme.bg} ${theme.border} ${theme.glow}` : getFunctionalColor(measure.chords[0].symbol, isCurrentBar)}`}
+                          >
                             {pattern && <div className={`absolute left-0 top-0 bottom-0 w-2.5 ${getPatternTheme(pattern.type).accent} opacity-80 z-10`}></div>}
                             
-                            {/* Pattern/Chunk Context Header */}
                             {pattern && isPatternStart && (
                                <div className="absolute top-4 left-8 right-8 z-20 flex flex-col items-start">
                                   <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full bg-black/90 border border-white/10 ${theme?.text} shadow-xl backdrop-blur-sm mb-1.5`}>
                                     {theme?.label} in {formatMusical(transposeChord(pattern.key, transposition))}
-                                  </span>
-                                  <span className="text-[7px] text-white/40 font-black uppercase tracking-widest ml-1">
-                                    Path: {getScalePath(pattern.type)}
                                   </span>
                                </div>
                             )}
@@ -233,7 +274,6 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                               })}
                             </div>
 
-                            {/* Permanent Scale Hint (Striking bottom label) */}
                             <div className={`absolute bottom-0 left-0 right-0 h-10 flex items-center justify-center border-t border-black/20 ${isCurrentBar ? 'bg-black/20' : 'bg-black/60 shadow-inner'}`}>
                                <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${isCurrentBar ? 'text-black' : (showScaleLayer ? 'text-emerald-400' : 'text-slate-500')} transition-colors`}>
                                  {formatMusical(getRecommendedScale(transposeChord(measure.chords[0].symbol, transposition)))}
@@ -253,10 +293,10 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="bg-[#0f172a] border border-slate-800 rounded-[3rem] p-10 shadow-2xl h-full transition-all hover:border-sky-500/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-[#0f172a] border border-slate-800 rounded-[3rem] p-10 shadow-2xl transition-all hover:border-sky-500/20">
                    <div className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-800">
-                      <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-400/20 shadow-lg shadow-amber-500/10">
+                      <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-400/20">
                          <i className="fas fa-lightbulb text-lg"></i>
                       </div>
                       <h5 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-100">Harmonic Language</h5>
@@ -265,15 +305,15 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                       {tune.practiceTools?.soloingTips?.map((tip, i) => (
                         <div key={i} className="flex gap-6 group">
                            <div className="w-3 h-3 rounded-full bg-sky-400/60 mt-2 flex-shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.5)] group-hover:bg-sky-400 transition-all scale-110"></div>
-                           <p className="text-xl md:text-2xl font-realbook text-slate-100 leading-tight tracking-wide italic transition-colors group-hover:text-white drop-shadow-sm">{tip}</p>
+                           <p className="text-xl md:text-2xl font-realbook text-slate-100 italic transition-colors group-hover:text-white drop-shadow-sm">{tip}</p>
                         </div>
                       ))}
                    </div>
                 </div>
 
-                <div className="bg-[#0f172a] border border-slate-800 rounded-[3rem] p-10 shadow-2xl h-full transition-all hover:border-sky-500/20">
+                <div className="bg-[#0f172a] border border-slate-800 rounded-[3rem] p-10 shadow-2xl transition-all hover:border-sky-500/20">
                   <div className="flex items-center gap-4 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-400/20 shadow-lg shadow-sky-500/10">
+                      <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-400/20">
                          <i className="fas fa-rotate text-lg"></i>
                       </div>
                       <h5 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-100">Target Loops</h5>
@@ -282,20 +322,18 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                   {tune.practiceTools?.recommendedLoops && tune.practiceTools.recommendedLoops.length > 0 ? (
                     <div className="space-y-4">
                         {tune.practiceTools.recommendedLoops.map((loop, i) => (
-                          <div key={i} className="p-6 bg-black/40 border border-slate-800 rounded-3xl hover:border-sky-500/40 transition-all group cursor-pointer hover:bg-sky-500/5 shadow-inner">
+                          <div key={i} className="p-6 bg-black/40 border border-slate-800 rounded-3xl hover:border-sky-500/40 transition-all group cursor-pointer shadow-inner">
                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-black text-sky-400 uppercase tracking-widest group-hover:text-sky-300">{loop.name}</span>
+                                <span className="text-sm font-black text-sky-400 uppercase tracking-widest">{loop.name}</span>
                                 <span className="text-[10px] text-slate-500 font-black bg-slate-800 px-3 py-1 rounded-full border border-white/5">Bars {loop.bars[0]}-{loop.bars[1]}</span>
                              </div>
-                             <p className="text-md text-slate-300 font-realbook italic group-hover:text-white transition-colors leading-relaxed">{loop.focus}</p>
+                             <p className="text-md text-slate-300 font-realbook italic leading-relaxed">{loop.focus}</p>
                           </div>
                         ))}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center h-48 bg-black/20 rounded-[2.5rem] border border-dashed border-slate-800/50 p-8 text-center">
-                      <i className="fas fa-rotate text-4xl mb-6 opacity-5"></i>
                       <p className="text-xs font-black uppercase tracking-widest text-slate-600 mb-2">Standard Form Active</p>
-                      <p className="text-[11px] text-slate-700 font-realbook italic leading-relaxed">"Loops allow you to internalize complex resolutions by repeating small chunks of the harmonic lego set."</p>
                     </div>
                   )}
                 </div>
@@ -303,80 +341,37 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
             </div>
           ) : (
             <div className="animate-in fade-in duration-500 space-y-10">
-               <div className="flex justify-between items-center">
-                  <h3 className="text-4xl font-jazz text-white">Technique Shed</h3>
-                  <span className="text-[10px] text-sky-400 font-realbook bg-sky-500/10 px-4 py-1.5 rounded-full border border-sky-500/20 tracking-widest uppercase font-black">{formatMusical(transposition)} DNA Sequences</span>
+               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                  <div>
+                    <h3 className="text-4xl font-jazz text-white">The DNA Shed</h3>
+                    <p className="text-slate-500 font-realbook mt-2">These are the building blocks specifically required for "{tune.title}".</p>
+                  </div>
+                  <span className="text-[10px] text-sky-400 font-realbook bg-sky-500/10 px-4 py-1.5 rounded-full border border-sky-500/20 tracking-widest uppercase font-black h-fit">
+                    {formatMusical(transposition)} Instrument
+                  </span>
                </div>
+               
                <div className="flex flex-col gap-8">
-                  {SCALE_DATA.map((scale, i) => (
-                    <div key={i} className="bg-[#0f172a] border border-slate-800 p-8 md:p-10 rounded-[3rem] hover:border-sky-500/30 transition-all group shadow-xl">
-                       <div className="flex flex-col gap-6">
-                          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                            <div>
-                               <h4 className="text-3xl md:text-4xl font-jazz text-sky-400 mb-2 tracking-wide leading-none">{formatMusical(scale.name)}</h4>
-                               <p className="text-slate-100 text-lg font-realbook opacity-70 mb-4">{formatMusical(scale.description)}</p>
-                               <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-xl">
-                                  <span className="text-[9px] font-black text-sky-400 uppercase tracking-widest block mb-1">Rooting Logic</span>
-                                  <p className="text-xs text-slate-400 font-realbook italic">
-                                    {scale.name.includes('Harmonic') 
-                                      ? "Starting note is flexible, but centered on the 'i' of the target key. In a ii-V-i, use this starting on the b9 or 3rd of the V chord for maximum pull."
-                                      : "Always visualize the root as your 'home base' anchor. Build vertical stacks from the root before exploring linear pathways."}
-                                  </p>
-                               </div>
-                            </div>
-                            <span className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] border border-slate-800 px-4 py-1 rounded-full w-fit">Concept {i+1}</span>
-                          </div>
-                          <div className="w-full bg-black/30 p-8 rounded-[2.5rem] border border-slate-900 shadow-inner">
-                            <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-4 block border-b border-slate-800/50 pb-2">Melodic Sequence</span>
-                            <ScaleDiagram intervals={scale.intervals} />
-                          </div>
-                       </div>
-                    </div>
+                  {SCALE_DEGREES.filter(s => tuneRequirements.has(s.name)).map((scale, i) => (
+                    <ScaleDNAItem 
+                      key={i} 
+                      scale={scale} 
+                      tip={tuneRequirements.get(scale.name)} 
+                    />
                   ))}
+
+                  <div className="mt-12 p-10 bg-black/40 border-2 border-dashed border-slate-800 rounded-[3rem] text-center">
+                    <p className="text-lg font-realbook text-slate-600 italic mb-6">"Need more depth? Head to the Study Room for the full Comparative DNA Matrix."</p>
+                    <button 
+                      onClick={() => (window as any).setActiveMode?.('STUDY')} 
+                      className="px-8 py-3 bg-slate-900 border border-slate-700 text-slate-400 font-jazz text-xl rounded-2xl hover:text-white transition-all"
+                    >
+                      Enter Study Room
+                    </button>
+                  </div>
                </div>
             </div>
           )}
-
-          {/* AI Shed Oracle Section */}
-          <div className="bg-[#0f172a] border-4 border-slate-800 rounded-[3.5rem] p-10 mt-20 overflow-hidden relative shadow-2xl">
-            <div className="absolute top-0 right-0 p-10 opacity-5 scale-150 rotate-12 pointer-events-none text-sky-400">
-               <i className="fas fa-crow text-9xl"></i>
-            </div>
-            <div className="flex flex-row justify-between items-center mb-10 relative z-10 gap-6">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-sky-500/10 border-2 border-sky-500/30 flex items-center justify-center text-sky-400">
-                  <i className="fas fa-crow text-3xl"></i>
-                </div>
-                <div>
-                  <h3 className="text-4xl font-jazz text-white leading-none">The Oracle</h3>
-                  <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Harmonic Wisdom</p>
-                </div>
-              </div>
-              <button onClick={loadAiSuggestions} disabled={isLoadingAi} className="px-8 py-4 bg-slate-900 hover:bg-slate-800 border-2 border-sky-500/40 text-sky-400 text-[10px] font-black rounded-full transition-all uppercase tracking-widest shadow-xl active:scale-95">
-                {isLoadingAi ? <i className="fas fa-compact-disc fa-spin mr-2"></i> : <i className="fas fa-bolt mr-2"></i>}
-                {isLoadingAi ? 'Shedding...' : 'Ask Oracle'}
-              </button>
-            </div>
-            {aiSuggestions ? (
-              <div className="relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="bg-black/40 p-8 rounded-[2.5rem] border border-slate-800">
-                   <p className="text-white text-xl font-realbook leading-relaxed mb-8 border-l-4 border-sky-500/40 pl-6 italic">"{formatMusical(aiSuggestions.strategy)}"</p>
-                   <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row gap-6 md:items-center">
-                      <div className="bg-sky-500/10 border border-sky-500/20 px-4 py-2 rounded-xl text-center">
-                         <span className="text-[9px] font-black text-sky-400 uppercase tracking-widest">The Drill</span>
-                         <h4 className="text-white text-lg font-jazz mt-1">{formatMusical(aiSuggestions.drill.title)}</h4>
-                      </div>
-                      <p className="text-slate-400 text-sm font-realbook leading-relaxed flex-1">{formatMusical(aiSuggestions.drill.description)}</p>
-                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-slate-700 border-4 border-dashed border-slate-800 rounded-[2.5rem] bg-black/10">
-                <i className="fas fa-music text-6xl mb-4 opacity-5"></i>
-                <p className="text-xl font-jazz tracking-widest opacity-20 uppercase">Awaiting Harmonic Wisdom</p>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>

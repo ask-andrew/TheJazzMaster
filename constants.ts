@@ -1,9 +1,6 @@
 
 import { Tune, Chord, Section } from './types.ts';
 
-/**
- * Creates a section from a simplified object structure to support Roman Numerals.
- */
 const createSectionDetailed = (id: string, name: string, data: { chord: string, roman?: string, note?: string }[]): Section => {
   return {
     id,
@@ -31,11 +28,32 @@ const createSectionsSimple = (data: Record<string, string[]>): Section[] => {
   }));
 };
 
+export const SCALE_DEGREES = [
+  { name: 'Ionian (Major)', degrees: ['1', '2', '3', '4', '5', '6', '7'], tags: ['Major', 'ii-V-I'] },
+  { name: 'Dorian', degrees: ['1', '2', 'b3', '4', '5', '6', 'b7'], tags: ['Minor', 'ii-V-I'] },
+  { name: 'Phrygian', degrees: ['1', 'b2', 'b3', '4', '5', 'b6', 'b7'], tags: ['Minor'] },
+  { name: 'Lydian', degrees: ['1', '2', '3', '#4', '5', '6', '7'], tags: ['Major', 'Maj7#11'] },
+  { name: 'Mixolydian', degrees: ['1', '2', '3', '4', '5', '6', 'b7'], tags: ['Dominant', 'ii-V-I'] },
+  { name: 'Aeolian', degrees: ['1', '2', 'b3', '4', '5', 'b6', 'b7'], tags: ['Minor'] },
+  { name: 'Locrian', degrees: ['1', 'b2', 'b3', '4', 'b5', 'b6', 'b7'], tags: ['Half-Dim'] },
+  { name: 'Locrian ♮2', degrees: ['1', '2', 'b3', '4', 'b5', 'b6', 'b7'], tags: ['Half-Dim', 'minor-ii-V'] },
+  { name: 'Melodic Minor', degrees: ['1', '2', 'b3', '4', '5', '6', '7'], tags: ['Minor', 'Tonic-Minor'] },
+  { name: 'Harmonic Minor', degrees: ['1', '2', 'b3', '4', '5', 'b6', '7'], tags: ['Minor', 'minor-ii-V'] },
+  { name: 'Altered', degrees: ['1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7'], tags: ['Dominant', 'Altered', 'V-alt'] },
+  { name: 'Bebop Major', degrees: ['1', '2', '3', '4', '5', 'b6', '6', '7'], tags: ['Major', 'Bebop'] },
+  { name: 'Dorian Bebop', degrees: ['1', '2', 'b3', '3', '4', '5', '6', 'b7'], tags: ['Minor', 'Bebop'] },
+  { name: 'Mixolydian Bebop', degrees: ['1', '2', '3', '4', '5', '6', 'b7', '7'], tags: ['Dominant', 'Bebop'] },
+  { name: 'Major Blues', degrees: ['1', '2', 'b3', '3', '5', '6'], tags: ['Major', 'Blues'] },
+  { name: 'Minor Blues', degrees: ['1', 'b3', '4', 'b5', '5', 'b7'], tags: ['Minor', 'Blues'] },
+];
+
 export const SCALE_DATA = [
-  { name: 'Major Bebop', intervals: '1 2 3 4 5 b6 6 7', description: 'Major scale with a passing tone between 5 and 6.' },
-  { name: 'Harmonic Minor', intervals: '1 2 b3 4 5 b6 7', description: 'Essential for minor ii-V-i progressions. Use on the V7alt chord.' },
-  { name: 'Melodic Minor', intervals: '1 2 b3 4 5 6 7', description: 'The "Jazz Minor". Used for altered dominants.' },
-  { name: 'Dorian', intervals: '1 2 b3 4 5 6 b7', description: 'The standard minor sound for ii-V-I progressions.' }
+  { name: 'Major Bebop', intervals: '1 2 3 4 5 b6 6 7', description: 'Major scale with a passing tone between 5 and 6.', targets: ['maj7', '6'] },
+  { name: 'Harmonic Minor', intervals: '1 2 b3 4 5 b6 7', description: 'Essential for minor ii-V-i progressions. Use on the V7alt chord.', targets: ['7alt', 'm(maj7)'] },
+  { name: 'Melodic Minor', intervals: '1 2 b3 4 5 6 7', description: 'The "Jazz Minor". Used for altered dominants and tonic minor.', targets: ['m6', 'm(maj7)', '7alt'] },
+  { name: 'Dorian', intervals: '1 2 b3 4 5 6 b7', description: 'The standard minor sound for ii-V-I progressions.', targets: ['m7'] },
+  { name: 'Major Blues', intervals: '1 2 b3 3 5 6', description: 'Sweet blues sound. Great for major standards and country-inflected jazz.', targets: ['maj7', '7'] },
+  { name: 'Minor Blues', intervals: '1 b3 4 b5 5 b7', description: 'The "standard" blues scale. Universal language for tension and grit.', targets: ['7', 'm7'] }
 ];
 
 export const INITIAL_TUNES: Tune[] = [
@@ -43,118 +61,254 @@ export const INITIAL_TUNES: Tune[] = [
     id: 'autumn-leaves',
     title: 'Autumn Leaves',
     composer: 'Joseph Kosma',
-    year: 1,
+    year: 1945,
     key: 'G minor',
     form: 'AABC (32 bars)',
-    tempo: 'Medium Swing',
-    style: 'Ballad to medium swing',
-    realBookPage: 'Vol 1, p40',
+    tempo: 140,
+    style: 'Medium Swing',
     category: 'Medium',
     mastery: 'Learning',
     sections: [
       createSectionDetailed("al-a1", "A1", [
-        { chord: "Cm7", roman: "iv7" }, { chord: "F7", roman: "bVII7" }, 
-        { chord: "Bbmaj7", roman: "bIIImaj7" }, { chord: "Ebmaj7", roman: "bVImaj7" },
-        { chord: "Am7b5", roman: "ii7b5" }, { chord: "D7", roman: "V7" }, 
-        { chord: "Gm6", roman: "i6" }, { chord: "Gm6", roman: "i6" }
+        { chord: "Cm7" }, { chord: "F7" }, { chord: "Bbmaj7" }, { chord: "Ebmaj7" },
+        { chord: "Am7b5" }, { chord: "D7alt" }, { chord: "Gm6" }, { chord: "Gm6" }
       ]),
       createSectionDetailed("al-a2", "A2", [
-        { chord: "Am7b5", roman: "ii7b5" }, { chord: "D7", roman: "V7" }, 
-        { chord: "Gm6", roman: "i6" }, { chord: "Gm6", roman: "i6" },
-        { chord: "Cm7", roman: "iv7" }, { chord: "F7", roman: "bVII7" }, 
-        { chord: "Bbmaj7", roman: "bIIImaj7" }, { chord: "Ebmaj7", roman: "bVImaj7" }
+        { chord: "Cm7" }, { chord: "F7" }, { chord: "Bbmaj7" }, { chord: "Ebmaj7" },
+        { chord: "Am7b5" }, { chord: "D7alt" }, { chord: "Gm6" }, { chord: "Gm6" }
       ]),
       createSectionDetailed("al-b", "B", [
-        { chord: "Am7b5", roman: "ii7b5" }, { chord: "D7", roman: "V7" }, 
-        { chord: "Gm6", roman: "i6" }, { chord: "Gm6", roman: "i6" }
+        { chord: "Am7b5" }, { chord: "D7alt" }, { chord: "Gm6" }, { chord: "Gm6" },
+        { chord: "Cm7" }, { chord: "F7" }, { chord: "Bbmaj7" }, { chord: "Ebmaj7" }
       ]),
       createSectionDetailed("al-c", "C", [
-        { chord: "Am7b5", roman: "ii7b5" }, { chord: "D7", roman: "V7" }, 
-        { chord: "Gm6", roman: "i6" }, { chord: "G7", roman: "I7", note: "turnaround" }
+        { chord: "Am7b5" }, { chord: "D7alt" }, { chord: "Gm6" }, { chord: "G7alt" }
       ])
     ],
     variants: [],
     patterns: [],
     practiceTools: {
-      iiVChains: [
-        { bars: [5, 6], targetKey: "Gm", quality: "minor ii-V" },
-        { bars: [9, 10], targetKey: "Gm", quality: "minor ii-V" },
-        { bars: [21, 22], targetKey: "Gm", quality: "minor ii-V" }
-      ],
-      recommendedLoops: [
-        { name: "Opening Cycle", bars: [1, 4], focus: "Cm7-F7-Bbmaj7-Ebmaj7 voice leading" },
-        { name: "Minor ii-V-i", bars: [5, 8], focus: "Am7b5-D7-Gm resolution" },
-        { name: "Ending Cadence", bars: [21, 24], focus: "Final ii-V with turnaround" }
-      ],
-      soloingTips: [
-        "Use harmonic minor and dorian over minor chords",
-        "Target chord tones on beats 1 and 3",
-        "Three ii-V-i patterns - great for practicing voice leading",
-        "G7 at end sets up modulation to Cm for cycling"
-      ]
+      recommendedLoops: [{ name: "Minor ii-V-i", bars: [5, 8], focus: "Internalizing Locrian Natural 2 to Altered" }],
+      soloingTips: ["Connect the 7th of F7 (Eb) to the 3rd of Bbmaj7 (D)."]
     }
   },
   {
     id: 'blue-bossa',
     title: 'Blue Bossa',
     composer: 'Kenny Dorham',
-    year: 1,
+    year: 1963,
     key: 'C minor',
-    form: 'AABC (16 bars)',
-    tempo: '150',
+    form: '16-bar form',
+    tempo: 160,
     style: 'Bossa Nova',
-    realBookPage: 'Vol 1, p74',
     category: 'Latin',
     mastery: 'Solid',
     sections: [
-      createSectionDetailed("bb-a1", "A1", [
-        { chord: "Cm7", roman: "i7" }, { chord: "Fm7", roman: "iv7" }, 
-        { chord: "Dm7b5", roman: "ii7b5" }, { chord: "G7", roman: "V7" }
-      ]),
-      createSectionDetailed("bb-a2", "A2", [
-        { chord: "Cm7", roman: "i7" }, { chord: "Fm7", roman: "iv7" }, 
-        { chord: "Dm7b5", roman: "ii7b5" }, { chord: "G7", roman: "V7" }
-      ]),
-      createSectionDetailed("bb-b", "B", [
-        { chord: "Ebm7", roman: "ii7 of Db" }, { chord: "Ab7", roman: "V7 of Db" }, 
-        { chord: "Dbmaj7", roman: "bIImaj7" }, { chord: "Dbmaj7", roman: "bIImaj7" }
-      ]),
-      createSectionDetailed("bb-c", "C", [
-        { chord: "Dm7b5", roman: "ii7b5" }, { chord: "G7", roman: "V7" }, 
-        { chord: "Cm7", roman: "i7" }, { chord: "Cm7", roman: "i7" }
+      createSectionDetailed("bb-a", "Chorus", [
+        { chord: "Cm7" }, { chord: "Fm7" }, { chord: "Dm7b5" }, { chord: "G7alt" },
+        { chord: "Cm7" }, { chord: "Fm7" }, { chord: "Dm7b5" }, { chord: "G7alt" },
+        { chord: "Ebm7" }, { chord: "Ab7" }, { chord: "Dbmaj7" }, { chord: "Dbmaj7" },
+        { chord: "Dm7b5" }, { chord: "G7alt" }, { chord: "Cm7" }, { chord: "C7alt" }
       ])
     ],
     variants: [],
     patterns: [],
     practiceTools: {
-      iiVChains: [
-        { bars: [3, 4], targetKey: "Cm", quality: "minor ii-V" },
-        { bars: [9, 10], targetKey: "Db", quality: "major ii-V" },
-        { bars: [13, 14], targetKey: "Cm", quality: "minor ii-V" }
-      ],
-      recommendedLoops: [
-        { name: "Cm vamp", bars: [1, 4], focus: "C dorian over Cm7-Fm7" },
-        { name: "Modulation", bars: [9, 12], focus: "Half-step shift to Db" },
-        { name: "Turnaround", bars: [13, 16], focus: "Return to Cm" }
-      ],
-      soloingTips: [
-        "C dorian for Cm7 and Fm7 sections",
-        "Db section: shift to major sound, use Db lydian",
-        "Practice smooth voice leading into half-step modulation",
-        "Comp on 2 and 4 for authentic bossa feel"
-      ]
+      recommendedLoops: [{ name: "The Modulation", bars: [9, 12], focus: "Half step shift up to Db Major" }],
+      soloingTips: ["C Dorian works for most of the tune except the Db section."]
+    }
+  },
+  {
+    id: 'all-the-things',
+    title: 'All The Things You Are',
+    composer: 'Jerome Kern',
+    year: 1939,
+    key: 'Ab major',
+    form: 'AA\'BA\'\' (36 bars)',
+    tempo: 180,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: [
+      createSectionDetailed("atta-a1", "A1", [
+        { chord: "Fm7" }, { chord: "Bbm7" }, { chord: "Eb7" }, { chord: "Abmaj7" },
+        { chord: "Dbmaj7" }, { chord: "Dm7" }, { chord: "G7" }, { chord: "Cmaj7" }
+      ]),
+      createSectionDetailed("atta-a2", "A2", [
+        { chord: "Cm7" }, { chord: "Fm7" }, { chord: "Bb7" }, { chord: "Ebmaj7" },
+        { chord: "Abmaj7" }, { chord: "Am7" }, { chord: "D7" }, { chord: "Gmaj7" }
+      ]),
+      createSectionDetailed("atta-b", "B", [
+        { chord: "Am7" }, { chord: "D7" }, { chord: "Gmaj7" }, { chord: "Gmaj7" },
+        { chord: "F#m7" }, { chord: "B7" }, { chord: "Emaj7" }, { chord: "C7alt" }
+      ]),
+      createSectionDetailed("atta-a3", "A3", [
+        { chord: "Fm7" }, { chord: "Bbm7" }, { chord: "Eb7" }, { chord: "Abmaj7" },
+        { chord: "Dbmaj7" }, { chord: "Dbm7" }, { chord: "Cm7" }, { chord: "Bdim7" },
+        { chord: "Bbm7" }, { chord: "Eb7" }, { chord: "Abmaj7" }, { chord: "G7alt" }
+      ])
+    ],
+    variants: [],
+    patterns: [],
+    practiceTools: {
+      recommendedLoops: [{ name: "Chromatic Ending", bars: [29, 32], focus: "Dbmaj7-Dbm7-Cm7-Bdim7" }],
+      soloingTips: ["The bridge modulates to G then E major."]
+    }
+  },
+  {
+    id: 'fly-me',
+    title: 'Fly Me To The Moon',
+    composer: 'Bart Howard',
+    year: 1954,
+    key: 'C major',
+    form: 'AB (32 bars)',
+    tempo: 120,
+    style: 'Swing / Bossa',
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSectionsSimple({
+      "A": ["Am7", "Dm7", "G7", "Cmaj7", "Fmaj7", "Bm7b5", "E7alt", "Am7 A7"],
+      "B": ["Dm7", "G7", "Cmaj7", "Am7", "Dm7", "G7", "Cmaj7", "Bm7b5 E7"]
+    }),
+    variants: [],
+    patterns: [],
+    practiceTools: {
+      recommendedLoops: [{ name: "Diatonic Cycle", bars: [1, 5], focus: "Walking through the key of C" }],
+      soloingTips: ["Great for practicing standard ii-V-I resolutions."]
+    }
+  },
+  {
+    id: 'take-the-a-train',
+    title: 'Take The A Train',
+    composer: 'Billy Strayhorn',
+    year: 1939,
+    key: 'C major',
+    form: 'AABA (32 bars)',
+    tempo: 160,
+    style: 'Swing',
+    category: 'Medium',
+    mastery: 'Familiar',
+    sections: createSectionsSimple({
+      "A1": ["Cmaj7", "Cmaj7", "D7b5", "D7b5", "Dm7", "G7", "Cmaj7", "Dm7 G7"],
+      "A2": ["Cmaj7", "Cmaj7", "D7b5", "D7b5", "Dm7", "G7", "Cmaj7", "C7"],
+      "B": ["Fmaj7", "Fmaj7", "Fmaj7", "Fmaj7", "D7", "D7", "Dm7", "G7"],
+      "A3": ["Cmaj7", "Cmaj7", "D7b5", "D7b5", "Dm7", "G7", "Cmaj7", "G7alt"]
+    }),
+    variants: [],
+    patterns: [],
+    practiceTools: {
+      recommendedLoops: [{ name: "Whole Tone Zone", bars: [3, 4], focus: "D Whole Tone over D7b5" }]
+    }
+  },
+  {
+    id: 'satin-doll',
+    title: 'Satin Doll',
+    composer: 'Duke Ellington',
+    year: 1953,
+    key: 'C major',
+    form: 'AABA (32 bars)',
+    tempo: 110,
+    category: 'Medium',
+    mastery: 'Learning',
+    sections: createSectionsSimple({
+      "A": ["Dm7 G7", "Dm7 G7", "Em7 A7", "Em7 A7", "Am7 D7", "Abm7 Db7", "Cmaj7", "Dm7 G7"],
+      "B": ["Gm7 C7", "Gm7 C7", "Fmaj7", "Fmaj7", "Am7 D7", "Am7 D7", "G7", "G7"]
+    }),
+    variants: [],
+    patterns: [],
+    practiceTools: {
+      soloingTips: ["Tune consists almost entirely of 'ii-V' chains."]
+    }
+  },
+  {
+    id: 'girl-ipanema',
+    title: 'The Girl From Ipanema',
+    composer: 'Antonio Carlos Jobim',
+    year: 1962,
+    key: 'F major',
+    form: 'AABA (40 bars)',
+    tempo: 130,
+    style: 'Bossa Nova',
+    category: 'Latin',
+    mastery: 'Learning',
+    sections: createSectionsSimple({
+      "A": ["Fmaj7", "Fmaj7", "G7", "G7", "Gm7", "Gb7", "Fmaj7", "Gb7"],
+      "B": ["Gbmaj7", "Gbmaj7", "B7", "B7", "F#m7", "F#m7", "D7", "D7", "Gm7", "Gm7", "Eb7", "Eb7", "Am7", "D7alt", "Gm7", "C7alt"]
+    }),
+    variants: [],
+    patterns: [],
+    practiceTools: {
+      recommendedLoops: [{ name: "The Bridge", bars: [17, 32], focus: "Complex modulations in major 3rds" }]
+    }
+  },
+  {
+    id: 'summertime',
+    title: 'Summertime',
+    composer: 'George Gershwin',
+    year: 1934,
+    key: 'A minor',
+    form: 'AB (16 bars)',
+    tempo: 90,
+    category: 'Ballad',
+    mastery: 'Familiar',
+    sections: createSectionsSimple({
+      "A": ["Am7", "Bm7 E7alt", "Am7", "Am7", "Dm7", "Dm7", "Bm7b5", "E7alt"],
+      "B": ["Am7", "Bm7 E7alt", "Cmaj7", "D7", "Am7", "Bm7 E7alt", "Am7", "Bm7 E7alt"]
+    }),
+    variants: [],
+    patterns: [],
+    practiceTools: {
+      soloingTips: ["Use A Minor Blues for a soulful, classic feel."]
+    }
+  },
+  {
+    id: 'black-orpheus',
+    title: 'Black Orpheus',
+    composer: 'Luiz Bonfá',
+    year: 1959,
+    key: 'A minor',
+    form: 'AAB (32 bars)',
+    tempo: 140,
+    style: 'Bossa Nova',
+    category: 'Latin',
+    mastery: 'Learning',
+    sections: createSectionsSimple({
+      "A": ["Am7", "Bm7b5 E7alt", "Am7", "Bm7b5 E7alt", "Dm7", "G7", "Cmaj7", "Fmaj7"],
+      "B": ["Bm7b5", "E7alt", "Am7", "Am7", "Bm7b5", "E7alt", "Am7", "Bm7b5 E7alt"]
+    }),
+    variants: [],
+    patterns: [],
+    practiceTools: {
+      soloingTips: ["Focus on the minor ii-V-i resolutions."]
+    }
+  },
+  {
+    id: 'blues-alice',
+    title: 'Blues For Alice',
+    composer: 'Charlie Parker',
+    year: 1951,
+    key: 'F',
+    form: '12-bar Bird Blues',
+    tempo: 180,
+    style: 'Bebop',
+    category: 'Blues',
+    mastery: 'Learning',
+    sections: createSectionsSimple({
+      "Chorus": ["Fmaj7", "Em7b5 A7", "Dm7 G7", "Cm7 F7", "Bb7", "Bbm7 Eb7", "Am7 D7", "Abm7 Db7", "Gm7", "C7", "Fmaj7 D7", "Gm7 C7"]
+    }),
+    variants: [],
+    patterns: [],
+    practiceTools: {
+      recommendedLoops: [{ name: "Bebop Descent", bars: [2, 5], focus: "Em7b5-A7-Dm7-G7-Cm7-F7" }]
     }
   },
   {
     id: 'tenor-madness',
     title: 'Tenor Madness',
     composer: 'Sonny Rollins',
-    year: 1,
+    year: 1956,
     key: 'Bb',
     form: '12-bar blues',
-    tempo: '200',
-    style: 'Bebop blues',
-    realBookPage: 'Vol 1, p436',
+    tempo: 220,
     category: 'Blues',
     mastery: 'Solid',
     sections: createSectionsSimple({
@@ -166,188 +320,16 @@ export const INITIAL_TUNES: Tune[] = [
         description: 'Standard Bb blues changes',
         sections: [
           createSectionDetailed("tm-b-chorus", "chorus", [
-            { chord: "Bb7", roman: "I7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" },
-            { chord: "Eb7", roman: "IV7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "Bb7", roman: "I7" },
-            { chord: "F7", roman: "V7" }, { chord: "Eb7", roman: "IV7" }, { chord: "Bb7", roman: "I7" }, { chord: "F7", roman: "V7" }
+            { chord: "Bb7" }, { chord: "Eb7" }, { chord: "Bb7" }, { chord: "Bb7" },
+            { chord: "Eb7" }, { chord: "Eb7" }, { chord: "Bb7" }, { chord: "Bb7" },
+            { chord: "F7" }, { chord: "Eb7" }, { chord: "Bb7" }, { chord: "F7" }
           ])
         ]
       }
     ],
     patterns: [],
     practiceTools: {
-      iiVChains: [
-        { bars: [4], targetKey: "Bb" },
-        { bars: [8], targetKey: "F" },
-        { bars: [9], targetKey: "Bb" },
-        { bars: [12], targetKey: "Bb" }
-      ],
-      soloingTips: [
-        "Target 3rds and 7ths through ii-V chains",
-        "Use Bb blues vs Bb mixolydian for contrast",
-        "Bars 4: Fm7-Bb7 (Concert) is the bebop ii-V leading to the IV chord",
-        "Listen to Sonny Rollins for blues vocabulary"
-      ]
+      soloingTips: ["Bb Blues scale vs Bb Mixolydian."]
     }
-  },
-  {
-    id: 'all-blues',
-    title: 'All Blues',
-    composer: 'Miles Davis',
-    year: 1,
-    key: 'G',
-    form: '12-bar blues (3/4)',
-    tempo: '120',
-    style: 'Modal jazz waltz',
-    realBookPage: 'Vol 1, p18',
-    category: 'Modal/Blues',
-    mastery: 'Familiar',
-    sections: [
-      createSectionDetailed("ab-chorus", "chorus", [
-        { chord: "G7", roman: "I7" }, { chord: "G7", roman: "I7" }, { chord: "G7", roman: "I7" }, { chord: "G7", roman: "I7" },
-        { chord: "C7", roman: "IV7" }, { chord: "C7", roman: "IV7" }, { chord: "G7", roman: "I7" }, { chord: "G7", roman: "I7" },
-        { chord: "D7", roman: "V7" }, { chord: "Eb7", roman: "bVI7" }, { chord: "D7", roman: "V7" }, { chord: "G7", roman: "I7" }
-      ])
-    ],
-    variants: [],
-    patterns: [],
-    practiceTools: {
-      recommendedLoops: [
-        { name: "G7 vamp", bars: [1, 4], focus: "G mixolydian, build phrases in 3/4" },
-        { name: "IV section", bars: [5, 8], focus: "C mixolydian" },
-        { name: "Chromatic turn", bars: [9, 12], focus: "D7-Eb7-D7 half-step" }
-      ],
-      soloingTips: [
-        "Think modally: G mixolydian, not blues scale",
-        "Eb7 (bar 10): chromatic approach using Eb mixolydian",
-        "Build longer phrases that work in 3/4 meter",
-        "Listen to Miles' phrasing on Kind of Blue"
-      ]
-    }
-  },
-  {
-    id: 'i-got-rhythm',
-    title: 'I Got Rhythm',
-    composer: 'George Gershwin',
-    year: 1,
-    key: 'Bb',
-    form: 'AABA (32 bars)',
-    tempo: '220',
-    style: 'Bebop standard',
-    realBookPage: 'Vol 2, p185',
-    category: 'Rhythm Changes',
-    mastery: 'Learning',
-    sections: [
-      createSectionDetailed("igr-a", "A", [
-        { chord: "Bb6", roman: "I6" }, { chord: "G7", roman: "VI7" }, { chord: "Cm7", roman: "ii7" }, { chord: "F7", roman: "V7" },
-        { chord: "Bb6", roman: "I6" }, { chord: "G7", roman: "VI7" }, { chord: "Cm7", roman: "ii7" }, { chord: "F7", roman: "V7" }
-      ]),
-      createSectionDetailed("igr-b", "B", [
-        { chord: "D7", roman: "III7" }, { chord: "D7", roman: "III7" }, { chord: "G7", roman: "VI7" }, { chord: "G7", roman: "VI7" },
-        { chord: "C7", roman: "II7" }, { chord: "C7", roman: "II7" }, { chord: "F7", roman: "V7" }, { chord: "F7", roman: "V7" }
-      ])
-    ],
-    variants: [
-      { name: 'Basic', sections: createSectionsSimple({ "A": ["Bb6", "G7", "Cm7", "F7", "Bb6", "G7", "Cm7", "F7"], "B": ["D7", "D7", "G7", "G7", "C7", "C7", "F7", "F7"] }) },
-      { name: 'Advanced', sections: createSectionsSimple({ "A": ["Bb6 G7", "Cm7 F7", "Dm7 G7", "Cm7 F7", "Fm7 Bb7", "Eb6 Edim7", "Bb6 G7", "Cm7 F7"], "B": ["Am7", "D7", "Dm7", "G7", "Gm7", "C7", "Cm7", "F7"] }) }
-    ],
-    patterns: [],
-    practiceTools: {
-      soloingTips: [
-        "Master this form - it's the basis for Anthropology, Oleo, Moose the Mooche, etc.",
-        "Bridge: descending dominants, use altered scales",
-        "Practice connecting bebop scales through changes",
-        "At faster tempos, think in 2-bar phrases"
-      ]
-    }
-  },
-  {
-    id: 'all-of-me',
-    title: 'All of Me',
-    composer: 'Simons & Marks',
-    key: 'C Major',
-    form: 'AABA',
-    tempo: 160,
-    category: 'Medium',
-    mastery: 'Learning',
-    sections: createSectionsSimple({
-      "A": ["C", "E7", "A7", "Dm7", "E7", "Am7", "D7", "Dm7 G7"],
-      "B": ["E7", "E7", "A7", "A7", "D7", "D7", "G7", "G7"]
-    }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'take-a-train',
-    title: 'Take The A Train',
-    composer: 'Billy Strayhorn',
-    key: 'C Major',
-    form: 'AABA',
-    tempo: 170,
-    category: 'Medium',
-    mastery: 'Solid',
-    sections: createSectionsSimple({
-      "A": ["C", "D7#11", "Dm7 G7", "C", "E7", "A7", "Dm7 G7", "C A7"],
-      "B": ["D7", "D7", "G7", "G7", "C7", "C7", "D7", "G7"]
-    }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'song-for-my-father',
-    title: 'Song for My Father',
-    composer: 'Horace Silver',
-    key: 'F Minor',
-    form: 'AAB',
-    tempo: 130,
-    category: 'Latin',
-    mastery: 'Solid',
-    sections: createSectionsSimple({
-      "A": ["Fm7", "Fm7", "Fm7", "Fm7", "Db7", "Db7", "Cm7", "C7"],
-      "B": ["Fm7", "Bb7", "Eb7", "Ab7", "Db7", "Db7", "Cm7", "C7"]
-    }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'c-jam-blues',
-    title: 'C Jam Blues',
-    composer: 'Duke Ellington',
-    key: 'C Major',
-    form: '12-bar blues',
-    tempo: 140,
-    category: 'Blues',
-    mastery: 'Familiar',
-    sections: createSectionsSimple({ "chorus": ["C7", "C7", "C7", "C7", "F7", "F7", "C7", "C7", "G7", "F7", "C7", "G7"] }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'all-the-things',
-    title: 'All The Things You Are',
-    composer: 'Jerome Kern',
-    key: 'Ab Major',
-    form: 'AABA',
-    tempo: 180,
-    category: 'Medium',
-    mastery: 'Learning',
-    sections: createSectionsSimple({
-      "A": ["Fm7", "Bb7", "Ebmaj7", "Abmaj7", "Dm7b5", "G7", "Cmaj7", "Cmaj7"],
-      "B": ["Em7", "A7", "Dmaj7", "Dmaj7", "Gm7", "C7", "Fmaj7", "Fmaj7"]
-    }),
-    variants: [],
-    patterns: []
-  },
-  {
-    id: 'mr-pc',
-    title: 'Mr. P.C.',
-    composer: 'John Coltrane',
-    key: 'C Minor',
-    form: 'Minor blues',
-    tempo: 240,
-    category: 'Blues',
-    mastery: 'Owned',
-    sections: createSectionsSimple({ "chorus": ["Cm7", "Cm7", "Cm7", "Cm7", "Fm7", "Fm7", "Cm7", "Cm7", "Ab7", "G7", "Cm7", "G7"] }),
-    variants: [],
-    patterns: []
   }
 ];
