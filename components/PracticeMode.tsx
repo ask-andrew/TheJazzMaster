@@ -3,12 +3,24 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Tune, PatternType, Transposition, Pattern, Section, Chord, AppMode } from '../types.ts';
 import { getPracticeSuggestions } from '../geminiService.ts';
 import { SCALE_DATA, SCALE_DEGREES } from '../constants.ts';
-import { transposeChord, analyzeHarmony, formatMusical, getRecommendedScale, getGuideTones, getRequiredScales } from '../musicUtils.ts';
+import { transposeChord, analyzeHarmony, formatMusical, getRecommendedScale, getGuideTones, getRequiredScales, getRootNote, getScaleNotes } from '../musicUtils.ts';
 
 interface PracticeModeProps { tune: Tune; transposition: Transposition; }
 interface Measure { chords: Chord[]; startBeat: number; index: number; }
 
-const ScaleDNAItem: React.FC<{ scale: typeof SCALE_DEGREES[0], tip?: string }> = ({ scale, tip }) => {
+interface OracleResponse {
+  veteransWisdom: string;
+  practiceFocus: {
+    title: string;
+    description: string;
+  };
+}
+
+const ScaleDNAItem: React.FC<{ scale: typeof SCALE_DEGREES[0], tip?: string, showRealNotes: boolean, currentChordRoot: string }> = ({ scale, tip, showRealNotes, currentChordRoot }) => {
+  const scaleNotes = useMemo(() => {
+    return showRealNotes && currentChordRoot ? getScaleNotes(currentChordRoot, scale.degrees) : [];
+  }, [showRealNotes, currentChordRoot, scale.degrees]);
+
   return (
     <div className="bg-[#0f172a] border border-slate-800 p-8 rounded-[2.5rem] shadow-xl hover:border-sky-500/30 transition-all group overflow-hidden">
       <div className="flex flex-col md:flex-row justify-between gap-6 mb-8">
@@ -39,10 +51,12 @@ const ScaleDNAItem: React.FC<{ scale: typeof SCALE_DEGREES[0], tip?: string }> =
           if (deg.includes('b')) colorClass = 'bg-rose-500/20 border-rose-500/40 text-rose-300';
           else if (deg.includes('#')) colorClass = 'bg-amber-500/20 border-amber-500/40 text-amber-300';
           
+          const displayValue = showRealNotes && scaleNotes[i] ? scaleNotes[i] : deg;
+
           return (
             <div key={i} className="flex flex-col items-center">
               <div className={`w-full h-12 rounded-xl flex items-center justify-center font-bold border-2 transition-all ${colorClass} text-sm`}>
-                {formatMusical(deg)}
+                {formatMusical(displayValue)}
               </div>
             </div>
           );
@@ -60,6 +74,9 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [showScaleLayer, setShowScaleLayer] = useState(false);
   const [isVariantPickerOpen, setIsVariantPickerOpen] = useState(false);
+  const [oracleResponse, setOracleResponse] = useState<OracleResponse | null>(null);
+  const [loadingOracle, setLoadingOracle] = useState(false);
+  const [showRealNotesInTech, setShowRealNotesInTech] = useState(false);
   
   // Dynamic tempo state
   const [customTempo, setCustomTempo] = useState<number>(() => {
@@ -75,6 +92,8 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
   useEffect(() => {
     setCustomTempo(typeof tune.tempo === 'number' ? tune.tempo : parseInt(tune.tempo as string) || 120);
     setSelectedVariantIndex(-1); // Reset variant on tune change
+    setOracleResponse(null); // Clear Oracle response on tune change
+    setLoadingOracle(false);
   }, [tune]);
 
   const playClick = (beat: number) => {
@@ -128,6 +147,18 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
       return { ...section, measures };
     });
   }, [activeSections]);
+
+  // Get current chord for "Show Notes" in tech mode
+  const currentActiveChord = useMemo(() => {
+    const allMeasures = groupedSections.flatMap(s => s.measures);
+    const activeMeasure = allMeasures.find(m => currentBeat >= m.startBeat && currentBeat < m.startBeat + 4);
+    return activeMeasure?.chords[0]; // Take the first chord of the active measure
+  }, [currentBeat, groupedSections]);
+
+  const currentTransposedChordRoot = useMemo(() => {
+    if (!currentActiveChord) return '';
+    return getRootNote(transposeChord(currentActiveChord.symbol, transposition));
+  }, [currentActiveChord, transposition]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -185,6 +216,24 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
     logs.push({ tune: tune.title, time: new Date().toLocaleTimeString(), note: `Working on ${activeTab === 'chords' ? 'Harmony' : 'Technique'} at ${customTempo} BPM` });
     localStorage.setItem('jazzmaster_logs', JSON.stringify(logs));
     alert('Progress logged to Journal!');
+  };
+
+  const askTheOracle = async () => {
+    const cacheKey = `oracle-${tune.id}-${transposition}`;
+    const cachedResponse = localStorage.getItem(cacheKey);
+
+    if (cachedResponse) {
+      setOracleResponse(JSON.parse(cachedResponse));
+      return;
+    }
+
+    setLoadingOracle(true);
+    const response = await getPracticeSuggestions(tune, transposition);
+    setOracleResponse(response);
+    if (response) {
+      localStorage.setItem(cacheKey, JSON.stringify(response));
+    }
+    setLoadingOracle(false);
   };
 
   return (
@@ -403,6 +452,44 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                   )}
                 </div>
               </div>
+
+              {/* The Shed Oracle Section */}
+              <div className="bg-[#0f172a] border border-slate-800 rounded-[3rem] p-10 shadow-2xl transition-all hover:border-amber-500/20">
+                 <div className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-800">
+                    <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-400/20">
+                       <i className="fas fa-hat-wizard text-lg"></i>
+                    </div>
+                    <h5 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-100">The Shed Oracle</h5>
+                 </div>
+                 {!oracleResponse && !loadingOracle && (
+                   <div className="text-center py-6">
+                     <p className="text-sm text-slate-600 mb-10 font-realbook italic">"Tap into the wisdom of the old masters. Ask the Oracle for a personalized tip."</p>
+                     <button onClick={askTheOracle} className="w-full py-4 bg-slate-900 hover:bg-slate-800 border border-indigo-500/30 text-indigo-400 font-jazz text-xl rounded-2xl transition-all">
+                       Ask The Oracle
+                     </button>
+                   </div>
+                 )}
+                 {loadingOracle && (
+                   <div className="flex flex-col items-center justify-center py-10">
+                     <i className="fas fa-spinner fa-spin text-4xl text-indigo-400 mb-4"></i>
+                     <p className="text-md text-slate-500 font-realbook italic">Consulting the ancient texts...</p>
+                   </div>
+                 )}
+                 {oracleResponse && (
+                   <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                     <p className="text-lg text-slate-300 leading-relaxed italic border-l-2 border-indigo-500/30 pl-6 font-realbook">
+                       "{oracleResponse.veteransWisdom}"
+                     </p>
+                     <div className="bg-black/40 p-6 rounded-2xl border border-slate-800">
+                        <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-2">Practice Focus: {oracleResponse.practiceFocus.title}</span>
+                        <p className="text-md text-slate-300 font-realbook italic">{oracleResponse.practiceFocus.description}</p>
+                     </div>
+                     <button onClick={askTheOracle} className="w-full py-3 bg-slate-900 hover:bg-slate-800 border border-indigo-500/30 text-indigo-400 font-jazz text-lg rounded-2xl transition-all">
+                       Ask Again
+                     </button>
+                   </div>
+                 )}
+              </div>
             </div>
           ) : (
             <div className="animate-in fade-in duration-500 space-y-10">
@@ -418,6 +505,12 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                     <span className="text-[10px] text-amber-400 font-realbook bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/20 tracking-widest uppercase font-black h-fit">
                       {customTempo} BPM
                     </span>
+                    <button
+                      onClick={() => setShowRealNotesInTech(!showRealNotesInTech)}
+                      className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all h-fit ${showRealNotesInTech ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-white'}`}
+                    >
+                      {showRealNotesInTech ? 'Show Degrees' : 'Show Notes'}
+                    </button>
                   </div>
                </div>
                
@@ -427,6 +520,8 @@ const PracticeMode: React.FC<PracticeModeProps> = ({ tune, transposition }) => {
                       key={i} 
                       scale={scale} 
                       tip={tuneRequirements.get(scale.name)} 
+                      showRealNotes={showRealNotesInTech}
+                      currentChordRoot={currentTransposedChordRoot}
                     />
                   ))}
 

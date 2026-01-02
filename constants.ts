@@ -164,7 +164,16 @@ export const INITIAL_TUNES: Tune[] = [
         { chord: "Bbm7" }, { chord: "Eb7" }, { chord: "Abmaj7" }, { chord: "G7alt" }
       ])
     ],
-    variants: [],
+    variants: [
+      {
+        name: 'Basic Changes',
+        description: 'Simplified diatonic movement for easier navigation.',
+        sections: createSectionsSimple({
+          "A": ["Fm7", "Bbm7", "Eb7", "Abmaj7", "Dbmaj7", "G7", "Cmaj7", "Cmaj7"],
+          "B": ["Am7", "D7", "Gmaj7", "Gmaj7", "F#m7", "B7", "Emaj7", "C7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       recommendedLoops: [{ name: "Chromatic Ending", bars: [29, 32], focus: "Dbmaj7-Dbm7-Cm7-Bdim7" }],
@@ -186,7 +195,16 @@ export const INITIAL_TUNES: Tune[] = [
       "A": ["Am7", "Dm7", "G7", "Cmaj7", "Fmaj7", "Bm7b5", "E7alt", "Am7 A7"],
       "B": ["Dm7", "G7", "Cmaj7", "Am7", "Dm7", "G7", "Cmaj7", "Bm7b5 E7"]
     }),
-    variants: [],
+    variants: [
+      {
+        name: 'Basic Changes',
+        description: 'Simplified diatonic chords.',
+        sections: createSectionsSimple({
+          "A": ["Am7", "Dm7", "G7", "Cmaj7", "Fmaj7", "Dm7", "G7", "Cmaj7"],
+          "B": ["Dm7", "G7", "Cmaj7", "Am7", "Dm7", "G7", "Cmaj7", "Cmaj7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       recommendedLoops: [{ name: "Diatonic Cycle", bars: [1, 5], focus: "Walking through the key of C" }],
@@ -210,7 +228,16 @@ export const INITIAL_TUNES: Tune[] = [
       "B": ["Fmaj7", "Fmaj7", "Fmaj7", "Fmaj7", "D7", "D7", "Dm7", "G7"],
       "A3": ["Cmaj7", "Cmaj7", "D7b5", "D7b5", "Dm7", "G7", "Cmaj7", "G7alt"]
     }),
-    variants: [],
+    variants: [
+      {
+        name: 'Basic Changes',
+        description: 'Standard diatonic ii-V-I progressions.',
+        sections: createSectionsSimple({
+          "A": ["Cmaj7", "Cmaj7", "Dm7", "G7", "Cmaj7", "Cmaj7", "Dm7", "G7"],
+          "B": ["Fmaj7", "Fmaj7", "Fmaj7", "Fmaj7", "D7", "D7", "G7", "G7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       recommendedLoops: [{ name: "Whole Tone Zone", bars: [3, 4], focus: "D Whole Tone over D7b5" }]
@@ -230,7 +257,16 @@ export const INITIAL_TUNES: Tune[] = [
       "A": ["Dm7 G7", "Dm7 G7", "Em7 A7", "Em7 A7", "Am7 D7", "Abm7 Db7", "Cmaj7", "Dm7 G7"],
       "B": ["Gm7 C7", "Gm7 C7", "Fmaj7", "Fmaj7", "Am7 D7", "Am7 D7", "G7", "G7"]
     }),
-    variants: [],
+    variants: [
+      {
+        name: 'Basic Changes',
+        description: 'Simplified ii-V chains.',
+        sections: createSectionsSimple({
+          "A": ["Dm7 G7", "Dm7 G7", "Em7 A7", "Em7 A7", "Dm7 G7", "Cmaj7", "Cmaj7", "Dm7 G7"],
+          "B": ["Gm7 C7", "Gm7 C7", "Fmaj7", "Fmaj7", "Dm7 G7", "Dm7 G7", "Cmaj7", "Cmaj7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       soloingTips: ["Tune consists almost entirely of 'ii-V' chains."]
@@ -247,11 +283,25 @@ export const INITIAL_TUNES: Tune[] = [
     style: 'Bossa Nova',
     category: 'Latin',
     mastery: 'Learning',
-    sections: createSectionsSimple({
-      "A": ["Fmaj7", "Fmaj7", "G7", "G7", "Gm7", "Gb7", "Fmaj7", "Gb7"],
-      "B": ["Gbmaj7", "Gbmaj7", "B7", "B7", "F#m7", "F#m7", "D7", "D7", "Gm7", "Gm7", "Eb7", "Eb7", "Am7", "D7alt", "Gm7", "C7alt"]
-    }),
-    variants: [],
+    // Fix: Wrap createSectionDetailed in an array as `sections` expects `Section[]`
+    sections: [createSectionDetailed("gfi-a", "A", [
+      { chord: "Fmaj7" }, { chord: "Fmaj7" }, { chord: "G7" }, { chord: "G7" }, 
+      { chord: "Gm7" }, { chord: "Gb7" }, { chord: "Fmaj7" }, { chord: "Gb7" }, 
+      { chord: "Gbmaj7" }, { chord: "Gbmaj7" }, { chord: "B7" }, { chord: "B7" }, 
+      { chord: "F#m7" }, { chord: "F#m7" }, { chord: "D7" }, { chord: "D7" }, 
+      { chord: "Gm7" }, { chord: "Gm7" }, { chord: "Eb7" }, { chord: "Eb7" }, 
+      { chord: "Am7" }, { chord: "D7alt" }, { chord: "Gm7" }, { chord: "C7alt" }
+    ])],
+    variants: [
+      {
+        name: 'Basic Changes',
+        description: 'Simplified harmonic rhythm.',
+        sections: createSectionsSimple({
+          "A": ["Fmaj7", "Fmaj7", "Gm7", "C7", "Gm7", "C7", "Fmaj7", "Fmaj7"],
+          "B": ["Gbmaj7", "B7", "F#m7", "B7", "Gm7", "C7", "Fmaj7", "C7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       recommendedLoops: [{ name: "The Bridge", bars: [17, 32], focus: "Complex modulations in major 3rds" }]
@@ -271,7 +321,16 @@ export const INITIAL_TUNES: Tune[] = [
       "A": ["Am7", "Bm7 E7alt", "Am7", "Am7", "Dm7", "Dm7", "Bm7b5", "E7alt"],
       "B": ["Am7", "Bm7 E7alt", "Cmaj7", "D7", "Am7", "Bm7 E7alt", "Am7", "Bm7 E7alt"]
     }),
-    variants: [],
+    variants: [
+      {
+        name: 'Basic Changes',
+        description: 'Simplified minor harmony.',
+        sections: createSectionsSimple({
+          "A": ["Am", "Dm", "Am", "Am", "Dm", "Dm", "Am", "E7"],
+          "B": ["Am", "Dm", "Am", "E7", "Am", "Dm", "Am", "E7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       soloingTips: ["Use A Minor Blues for a soulful, classic feel."]
@@ -292,7 +351,16 @@ export const INITIAL_TUNES: Tune[] = [
       "A": ["Am7", "Bm7b5 E7alt", "Am7", "Bm7b5 E7alt", "Dm7", "G7", "Cmaj7", "Fmaj7"],
       "B": ["Bm7b5", "E7alt", "Am7", "Am7", "Bm7b5", "E7alt", "Am7", "Bm7b5 E7alt"]
     }),
-    variants: [],
+    variants: [
+      {
+        name: 'Basic Changes',
+        description: 'Simplified minor ii-V-i.',
+        sections: createSectionsSimple({
+          "A": ["Am7", "E7", "Am7", "E7", "Dm7", "G7", "Cmaj7", "Fmaj7"],
+          "B": ["Dm7", "G7", "Cmaj7", "Am7", "Dm7", "G7", "Cmaj7", "E7"]
+        })
+      }
+    ],
     patterns: [],
     practiceTools: {
       soloingTips: ["Focus on the minor ii-V-i resolutions."]

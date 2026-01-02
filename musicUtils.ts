@@ -134,7 +134,7 @@ export function analyzeHarmony(chords: Chord[]): Pattern[] {
     const r1 = getRootNote(c1.symbol);
     const r2 = getRootNote(c2.symbol);
     const s1 = c1.symbol.toLowerCase();
-    const s2 = c2.symbol.toLowerCase();
+    const s2 = c2.symbol.toLowerCase(); 
 
     if (c3 && (s1.includes('m7b5') || s1.includes('dim'))) {
       const r3 = getRootNote(c3.symbol);
@@ -197,4 +197,43 @@ export function chunkArray<T>(array: T[], size: number): T[][] {
     chunks.push(array.slice(i, i + size));
   }
   return chunks;
+}
+
+// Maps degrees like 'b3' or '#4' to semitone distances from the root.
+export function getIntervalSemitones(degree: string): number {
+  const base = parseInt(degree.replace(/[b#]/g, ''));
+  let semitones = 0;
+  switch (base) {
+    case 1: semitones = 0; break;
+    case 2: semitones = 2; break;
+    case 3: semitones = 4; break;
+    case 4: semitones = 5; break;
+    case 5: semitones = 7; break;
+    case 6: semitones = 9; break;
+    case 7: semitones = 11; break;
+    case 8: semitones = 12; break; // For bebop scales with an 8th degree
+    default: return -1; // Should not happen with valid degrees
+  }
+
+  if (degree.includes('b')) semitones--;
+  if (degree.includes('#')) semitones++;
+
+  return semitones;
+}
+
+// Converts a root note and semitones into an actual musical note.
+export function getNoteFromSemitones(rootNote: string, semitones: number): string {
+  const rootIdx = notes.indexOf(normalizeNote(rootNote));
+  if (rootIdx === -1) return ''; // Invalid root note
+  const newIndex = (rootIdx + semitones + 12) % 12; // +12 to handle negative semitones
+  return notes[newIndex];
+}
+
+// Generates an array of actual notes for a scale given a root and its degrees.
+export function getScaleNotes(rootNote: string, degrees: string[] | undefined): string[] {
+  if (!degrees || degrees.length === 0) return [];
+  return degrees.map(degree => {
+    const semitones = getIntervalSemitones(degree);
+    return getNoteFromSemitones(rootNote, semitones);
+  });
 }

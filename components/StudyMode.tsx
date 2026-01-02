@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Tune, Transposition, Chord } from '../types.ts';
-import { transposeChord, chunkArray, formatMusical, getGuideTones, getRequiredScales } from '../musicUtils.ts';
+import { transposeChord, chunkArray, formatMusical, getGuideTones, getRequiredScales, getScaleNotes } from '../musicUtils.ts';
 import { SCALE_DATA, SCALE_DEGREES } from '../constants.ts';
 
 interface StudyModeProps {
@@ -16,6 +16,7 @@ type QuizType = 'SPEED_SHED' | 'DNA_MATRIX' | 'CHUNKS' | 'FORM';
 const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
   const [activeFilter, setActiveFilter] = useState<string>('All');
   const [highlightMode, setHighlightMode] = useState(true);
+  const [showRealNotes, setShowRealNotes] = useState(false); // New state for toggling real notes
   
   const requiredScales = useMemo(() => tune ? getRequiredScales(tune) : new Map<string, string>(), [tune]);
 
@@ -30,6 +31,8 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
     if (activeFilter !== 'All') list = list.filter(s => s.tags?.includes(activeFilter));
     return list;
   }, [activeFilter]);
+
+  const defaultRootForNotes = 'C'; // Consistent root for displaying real notes in the matrix
 
   return (
     <div className="bg-[#0f172a] rounded-[3rem] p-8 md:p-12 border-2 border-slate-800 animate-in fade-in duration-500 shadow-2xl">
@@ -66,6 +69,12 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
                  {highlightMode ? 'Focus: Repertoire' : 'Show All'}
                </button>
              )}
+             <button
+               onClick={() => setShowRealNotes(!showRealNotes)}
+               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${showRealNotes ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-white'}`}
+             >
+               {showRealNotes ? 'Show Degrees' : 'Show Notes'}
+             </button>
            </div>
         </div>
 
@@ -87,8 +96,8 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
         </div>
 
         <div className="overflow-x-auto pb-4">
-          <div className="min-w-[1100px]">
-            <div className="grid grid-cols-[240px_repeat(8,1fr)_180px] gap-4 text-center font-black uppercase tracking-widest text-slate-600 text-[9px] pb-4 border-b border-slate-800">
+          <div className="min-w-[1200px]"> {/* Increased min-width for Scale Name visibility */}
+            <div className="grid grid-cols-[280px_repeat(8,1fr)_180px] gap-4 text-center font-black uppercase tracking-widest text-slate-600 text-[9px] pb-4 border-b border-slate-800">
               <div className="text-left">Scale Identity</div>
               <div>1</div>
               <div>2</div>
@@ -105,6 +114,7 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
               {filteredScales.map((scale, i) => {
                 const isRequired = requiredScales.has(scale.name);
                 const tip = requiredScales.get(scale.name);
+                const scaleNotes = showRealNotes ? getScaleNotes(defaultRootForNotes, scale.degrees) : [];
                 
                 // Dim if tune is selected but this scale isn't used
                 const opacity = (tune && highlightMode && !isRequired) ? 'opacity-20 grayscale' : 'opacity-100';
@@ -112,7 +122,7 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
                 return (
                   <div 
                     key={i} 
-                    className={`grid grid-cols-[240px_repeat(8,1fr)_180px] gap-4 items-center group py-1 transition-all duration-500 ${opacity} ${isRequired ? 'scale-[1.01]' : ''}`}
+                    className={`grid grid-cols-[280px_repeat(8,1fr)_180px] gap-4 items-center group py-1 transition-all duration-500 ${opacity} ${isRequired ? 'scale-[1.01]' : ''}`}
                   >
                     <div className="text-left pr-4">
                       <div className="flex items-center gap-2">
@@ -134,6 +144,8 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
 
                     {[0, 1, 2, 3, 4, 5, 6, 7].map((dIdx) => {
                       const deg = scale.degrees[dIdx];
+                      const displayValue = showRealNotes ? scaleNotes[dIdx] : deg;
+
                       if (!deg) return <div key={dIdx} className="h-12 rounded-xl border-2 border-dashed border-slate-800/10 opacity-10"></div>;
 
                       let colorClass = 'bg-slate-900 border-slate-800 text-slate-500'; // Natural
@@ -142,7 +154,7 @@ const ScaleDNAMatrix: React.FC<{ tune?: Tune }> = ({ tune }) => {
                       
                       return (
                         <div key={dIdx} className={`h-12 rounded-xl flex items-center justify-center font-bold border-2 transition-all ${colorClass}`}>
-                          {formatMusical(deg)}
+                          {formatMusical(displayValue)}
                         </div>
                       );
                     })}
