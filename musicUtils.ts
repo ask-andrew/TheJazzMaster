@@ -49,10 +49,15 @@ export function getRecommendedScale(symbol: string): string {
 }
 
 /**
- * Returns a map of scale names found in the tune and their first occurrence measure.
+ * Returns a map of scale names found in the tune and their first occurrence details.
  */
-export function getRequiredScales(tune: Tune): Map<string, string> {
-  const scaleMap = new Map<string, string>();
+export interface ScaleRequirement {
+  tip: string;
+  firstChord: string;
+}
+
+export function getRequiredScales(tune: Tune): Map<string, ScaleRequirement> {
+  const scaleMap = new Map<string, ScaleRequirement>();
   let currentMeasure = 1;
   let beatCount = 0;
 
@@ -69,7 +74,10 @@ export function getRequiredScales(tune: Tune): Map<string, string> {
       else if (s.includes('m')) scaleType = 'Melodic Minor';
 
       if (!scaleMap.has(scaleType)) {
-        scaleMap.set(scaleType, `First seen in ${section.name} (Meas. ${currentMeasure})`);
+        scaleMap.set(scaleType, {
+          tip: `First seen in ${section.name} (Meas. ${currentMeasure})`,
+          firstChord: chord.symbol
+        });
       }
 
       beatCount += chord.duration;
@@ -231,7 +239,7 @@ export function getNoteFromSemitones(rootNote: string, semitones: number): strin
 
 // Generates an array of actual notes for a scale given a root and its degrees.
 export function getScaleNotes(rootNote: string, degrees: string[] | undefined): string[] {
-  if (!degrees || degrees.length === 0) return [];
+  if (!degrees || degrees.length === 0 || !rootNote) return [];
   return degrees.map(degree => {
     const semitones = getIntervalSemitones(degree);
     return getNoteFromSemitones(rootNote, semitones);

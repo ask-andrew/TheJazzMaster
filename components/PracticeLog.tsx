@@ -91,8 +91,8 @@ const PracticeLog: React.FC = () => {
 
         <div className="bg-[#0f172a] border border-slate-800 rounded-[3rem] p-10 h-fit sticky top-8 shadow-2xl">
           <div className="flex items-center gap-4 mb-10">
-            <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500">
-               <i className="fas fa-hat-cowboy"></i>
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-400/20 flex items-center justify-center text-amber-400"> {/* Updated colors */}
+               <i className="fas fa-dove"></i> {/* Changed to fa-dove */}
             </div>
             <div>
               <h3 className="text-2xl font-jazz text-white leading-none">Oracle Feedback</h3>
@@ -103,19 +103,19 @@ const PracticeLog: React.FC = () => {
           {!aiAnalysis ? (
             <div className="text-center py-6">
               <p className="text-sm text-slate-600 mb-10 font-realbook">Feed the Oracle your logs for some grizzled veteran advice.</p>
-              <button onClick={getAnalysis} disabled={loadingAi} className="w-full py-4 bg-slate-900 hover:bg-slate-800 border border-sky-500/30 text-sky-400 font-jazz text-xl rounded-2xl transition-all">
+              <button onClick={getAnalysis} disabled={loadingAi} className="w-full py-4 bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-400 font-jazz text-xl rounded-2xl transition-all"> {/* Updated colors */}
                 {loadingAi ? 'Analyzing...' : 'Hear the Truth'}
               </button>
             </div>
           ) : (
             <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500">
-              <p className="text-lg text-slate-400 leading-relaxed italic border-l-2 border-sky-500/30 pl-6 font-realbook">
+              <p className="text-lg text-slate-400 leading-relaxed italic border-l-2 border-amber-500/30 pl-6 font-realbook"> {/* Updated colors */}
                 "{aiAnalysis.analysis}"
               </p>
               <div className="space-y-4">
                 {aiAnalysis.coachingPoints.map((point: string, i: number) => (
                   <div key={i} className="flex gap-4 text-sm text-slate-500 bg-black/40 p-5 rounded-2xl border border-slate-900/50">
-                    <i className="fas fa-ghost text-sky-500/40 mt-1"></i>
+                    <i className="fas fa-ghost text-amber-500/40 mt-1"></i> {/* Updated colors */}
                     <span className="font-realbook">{point}</span>
                   </div>
                 ))}

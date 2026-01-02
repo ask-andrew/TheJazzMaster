@@ -56,6 +56,7 @@ export const SCALE_DATA = [
   { name: 'Minor Blues', intervals: '1 b3 4 b5 5 b7', description: 'The "standard" blues scale. Universal language for tension and grit.', targets: ['7', 'm7'] }
 ];
 
+// Fix: Explicitly type INITIAL_TUNES as Tune[] to ensure type checking
 export const INITIAL_TUNES: Tune[] = [
   {
     id: 'autumn-leaves',
